@@ -21,11 +21,10 @@ let doOcpIndent = async (code: string, token: vscode.CancellationToken) => {
 
     let output = await getStream(cp.stdout);
     cp.unref();
+    if (token.isCancellationRequested) return null;
 
     let newIndents =  output.trim().split(/\n/g).map((n) => +n);
     let oldIndents = code.split(/\n/g).map((line) => /^\s*/.exec(line)[0]);
-
-    if (token.isCancellationRequested) return null;
 
     let edits = [];
     newIndents.forEach((indent, line) => {
@@ -104,12 +103,12 @@ export function activate(context: vscode.ExtensionContext) {
 
                 return new vscode.CompletionList(result.entries.map(({name, kind, desc, info}) => {
                     let completionItem = new vscode.CompletionItem(name);
-                    let kindFromMerlin = (kind) => {
-                        switch (kind) {
+                    let toVsKind = (kind) => {
+                        switch (kind.toLowerCase()) {
                             case "value": return vscode.CompletionItemKind.Value;
                             case "variant": return vscode.CompletionItemKind.Enum;
                             case "constructor": return vscode.CompletionItemKind.Constructor;
-                            case "label": return vscode.CompletionItemKind.Unit;
+                            case "label": return vscode.CompletionItemKind.Field;
                             case "module": return vscode.CompletionItemKind.Module;
                             case "signature": return vscode.CompletionItemKind.Interface;
                             case "type": return vscode.CompletionItemKind.Class;
@@ -120,7 +119,7 @@ export function activate(context: vscode.ExtensionContext) {
                         }
                     };
 
-                    completionItem.kind = kindFromMerlin(kind.toLowerCase());
+                    completionItem.kind = toVsKind(kind);
                     completionItem.detail = desc;
                     completionItem.documentation = info;
                     return completionItem;
@@ -150,6 +149,46 @@ export function activate(context: vscode.ExtensionContext) {
                 }
 
                 return null;
+            }
+        })
+    );
+
+    context.subscriptions.push(
+        vscode.languages.registerDocumentSymbolProvider(ocamlLang, {
+            async provideDocumentSymbols(document, token) {
+                await syncBuffer(document, token);
+
+                let [status, result] = await session.request(['outline']);
+                if (token.isCancellationRequested) return null;
+
+                if (status !== 'return') return null;
+
+                let symbols = [];
+                let toVsKind = (kind) => {
+                    switch (kind.toLowerCase()) {
+                        case "value": return vscode.SymbolKind.Variable;
+                        case "variant": return vscode.SymbolKind.Enum;
+                        case "constructor": return vscode.SymbolKind.Constructor;
+                        case "label": return vscode.SymbolKind.Field;
+                        case "module": return vscode.SymbolKind.Module;
+                        case "signature": return vscode.SymbolKind.Interface;
+                        case "type": return vscode.SymbolKind.Class;
+                        case "method": return vscode.SymbolKind.Function;
+                        case "#": return vscode.SymbolKind.Method;
+                        case "exn": return vscode.SymbolKind.Class;
+                        case "class": return vscode.SymbolKind.Class;
+                    }
+                };
+                let traverse = (nodes) => {
+                    for (let {name, kind, start, end, children} of nodes) {
+                        symbols.push(new vscode.SymbolInformation(name, toVsKind(kind), toVsRange(start, end)));
+                        if (Array.isArray(children)) {
+                            traverse(children);
+                        }
+                    }
+                };
+                traverse(result);
+                return symbols;
             }
         })
     );
