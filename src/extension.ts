@@ -114,7 +114,7 @@ export function activate(context: vscode.ExtensionContext) {
                             case "type": return vscode.CompletionItemKind.Class;
                             case "method": return vscode.CompletionItemKind.Function;
                             case "#": return vscode.CompletionItemKind.Method;
-                            case "exn": return vscode.CompletionItemKind.Class;
+                            case "exn": return vscode.CompletionItemKind.Constructor;
                             case "class": return vscode.CompletionItemKind.Class;
                         }
                     };
@@ -175,7 +175,7 @@ export function activate(context: vscode.ExtensionContext) {
                         case "type": return vscode.SymbolKind.Class;
                         case "method": return vscode.SymbolKind.Function;
                         case "#": return vscode.SymbolKind.Method;
-                        case "exn": return vscode.SymbolKind.Class;
+                        case "exn": return vscode.SymbolKind.Constructor;
                         case "class": return vscode.SymbolKind.Class;
                     }
                 };
