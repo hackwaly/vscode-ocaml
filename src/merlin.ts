@@ -21,26 +21,19 @@ export class OCamlMerlinSession {
             terminal: false
         });
     }
-    
+
     request(data: any): any {
         let promise = this._wait.then(() => {
             return new Promise((resolve, reject) => {
                 this._rl.question(JSON.stringify(data) + '\n', (answer) => {
-                    let result = JSON.parse(answer);
-                    let [kind, payload] = result;
-                    if (kind === 'return') {
-                        resolve(payload);
-                    } else {
-                        console.error(result);
-                        reject(result);
-                    }
+                    resolve(JSON.parse(answer));
                 });
             });
         });
         this._wait = promise.then(() => {});
         return promise;
     }
-    
+
     dispose() {
         this._rl.close();
         this._cp.kill();

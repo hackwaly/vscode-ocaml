@@ -40,8 +40,10 @@ export function activate(context: vscode.ExtensionContext) {
                 let prefix = /[A-Za-z_][A-Za-z_'0-9]*(?:\.[A-Za-z_][A-Za-z_'0-9]*)*\.?$/.exec(line)[0];
 
                 await syncBuffer(document, token);
-                let result = await session.request(['complete', 'prefix', prefix, 'at', fromVsPos(position)]);
+                let [status, result] = await session.request(['complete', 'prefix', prefix, 'at', fromVsPos(position)]);
                 if (token.isCancellationRequested) return null;
+
+                if (status !== 'return') return;
 
                 return new vscode.CompletionList(result.entries.map(({name, kind, desc, info}) => {
                     let completionItem = new vscode.CompletionItem(name);
@@ -75,11 +77,10 @@ export function activate(context: vscode.ExtensionContext) {
                 await syncBuffer(document, token);
 
                 for (let kind of ['ml', 'mli']) {
-                    let result = await session.request(['locate', null, 'ml', 'at', fromVsPos(position)]);
+                    let [status, result] = await session.request(['locate', null, 'ml', 'at', fromVsPos(position)]);
                     if (token.isCancellationRequested) return null;
 
-                    if (typeof result === 'string') {
-                        console.log(result);
+                    if (status !== 'return' || typeof result === 'string') {
                         continue;
                     }
 
@@ -101,14 +102,14 @@ export function activate(context: vscode.ExtensionContext) {
             async provideHover(document, position, token) {
                 await syncBuffer(document, token);
 
-                let result = await session.request(['type', 'enclosing', 'at', fromVsPos(position)]);
+                let [status, result] = await session.request(['type', 'enclosing', 'at', fromVsPos(position)]);
                 if (token.isCancellationRequested) return null;
 
-                if (result.length <= 0) return;
+                if (status !== 'return' || result.length <= 0) return;
 
                 let {start, end, type} = result[0];
 
-                if (type.startsWith('sig')) {
+                if (type.includes('\n')) {
                     let lines = type.split(/\n/g);
                     if (lines.length > 6) {
                         let end = lines.pop();
@@ -117,8 +118,8 @@ export function activate(context: vscode.ExtensionContext) {
                         lines.push(end);
                     }
                     type = lines.join('\n');
-                } else {
-                    type = `type t = ${type}`;
+                } else if (!type.startsWith('type ')) {
+                    type = `type _ = ${type}`;
                 }
 
                 return new vscode.Hover({language: 'ocaml', value: type}, toVsRange(start, end));
@@ -129,8 +130,10 @@ export function activate(context: vscode.ExtensionContext) {
     let provideLinter = async (document, token) => {
         await syncBuffer(document, token);
 
-        let result = await session.request(['errors']);
+        let [status, result] = await session.request(['errors']);
         if (token.isCancellationRequested) return null;
+
+        if (status !== 'return') return;
 
         return result.map(({type, start, end, message}) => {
             let fromType = (type) => {
@@ -144,6 +147,7 @@ export function activate(context: vscode.ExtensionContext) {
                         return vscode.DiagnosticSeverity.Warning;
                 }
             };
+
             return new vscode.Diagnostic(
                 toVsRange(start, end),
                 message,
