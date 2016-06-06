@@ -71,6 +71,10 @@
       "type": "object",
       "title": "OCaml configuration",
       "properties": {
+        "ocaml.ocpIndentPath": {
+          "type": "string",
+          "default": "ocp-indent"
+        },
         "ocaml.merlinPath": {
           "type": "string",
           "default": "ocamlmerlin"
@@ -92,5 +96,6 @@
     "vscode": "^0.11.0"
   },
   "dependencies": {
+    "get-stream": "^2.2.1"
   }
 }

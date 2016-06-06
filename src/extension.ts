@@ -2,16 +2,57 @@
 
 import * as vscode from 'vscode';
 import {OCamlMerlinSession} from './merlin';
+import * as child_process from 'child_process';
+
+let getStream = require('get-stream');
+let ocamlLang = { language: 'ocaml' };
+let configuration = vscode.workspace.getConfiguration("ocaml");
+
+let doOcpIndent = async (code: string, token: vscode.CancellationToken) => {
+    let ocpIndentPath = configuration.get<string>('ocpIndentPath');
+    let cp = child_process.spawn(ocpIndentPath, ['--numeric']);
+
+    token.onCancellationRequested(() => {
+        cp.disconnect();
+    });
+
+    cp.stdin.write(code);
+    cp.stdin.end();
+
+    let output = await getStream(cp.stdout);
+    cp.unref();
+
+    let newIndents =  output.trim().split(/\n/g).map((n) => +n);
+    let oldIndents = code.split(/\n/g).map((line) => /^\s*/.exec(line)[0]);
+
+    if (token.isCancellationRequested) return null;
+
+    let edits = [];
+    newIndents.forEach((indent, line) => {
+        let oldIndent = oldIndents[line];
+        let newIndent = ' '.repeat(indent);
+        if (oldIndent !== newIndent) {
+            edits.push(vscode.TextEdit.replace(
+                new vscode.Range(
+                    new vscode.Position(line, 0),
+                    new vscode.Position(line, oldIndent.length)
+                ),
+                newIndent)
+            );
+        }
+    });
+
+    return edits;
+};
 
 export function activate(context: vscode.ExtensionContext) {
-    let configuration = vscode.workspace.getConfiguration("ocaml");
     let session = new OCamlMerlinSession();
 
     let syncBuffer = async (document, token) => {
         await session.request(['checkout', 'auto', document.fileName]);
         if (token.isCancellationRequested) return null;
 
-        await session.request(['seek', 'exact', {line: 1, col: 0}]);
+        await session.request(['seek', 'exact', { line: 1, col: 0 }]);
         if (token.isCancellationRequested) return null;
 
         await session.request(['tell', 'source-eof', document.getText()]);
@@ -31,7 +72,23 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(session);
 
     context.subscriptions.push(
-        vscode.languages.registerCompletionItemProvider({language: 'ocaml'}, {
+        vscode.languages.registerDocumentFormattingEditProvider(ocamlLang, {
+            provideDocumentFormattingEdits(document, options, token) {
+                return doOcpIndent(document.getText(), token);
+            }
+        })
+    );
+
+    context.subscriptions.push(
+        vscode.languages.registerOnTypeFormattingEditProvider(ocamlLang, {
+            async provideOnTypeFormattingEdits(document, position, ch, options, token) {
+                return doOcpIndent(document.getText(), token);
+            }
+        }, ' ', ';', '\n', ')', ']', '}')
+    );
+
+    context.subscriptions.push(
+        vscode.languages.registerCompletionItemProvider(ocamlLang, {
             async provideCompletionItems(document, position, token) {
                 let line = document.getText(new vscode.Range(
                     new vscode.Position(position.line, 0),
@@ -72,7 +129,7 @@ export function activate(context: vscode.ExtensionContext) {
         }, '.'));
 
     context.subscriptions.push(
-        vscode.languages.registerDefinitionProvider({language: 'ocaml'}, {
+        vscode.languages.registerDefinitionProvider(ocamlLang, {
             async provideDefinition(document, position, token) {
                 await syncBuffer(document, token);
 
@@ -98,7 +155,7 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     context.subscriptions.push(
-        vscode.languages.registerHoverProvider({language: 'ocaml'}, {
+        vscode.languages.registerHoverProvider(ocamlLang, {
             async provideHover(document, position, token) {
                 await syncBuffer(document, token);
 

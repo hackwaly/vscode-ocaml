@@ -36,6 +36,6 @@ export class OCamlMerlinSession {
 
     dispose() {
         this._rl.close();
-        this._cp.kill();
+        this._cp.disconnect();
     }
 }
