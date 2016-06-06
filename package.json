@@ -1,0 +1,96 @@
+{
+  "private": true,
+  "name": "vscode-ocaml",
+  "displayName": "OCaml",
+  "description": "Rich OCaml language support for Visual Studio Code",
+  "version": "0.0.1",
+  "publisher": "hackwaly",
+  "engines": {
+    "vscode": "^1.0.0"
+  },
+  "categories": [
+    "Languages"
+  ],
+  "activationEvents": [
+    "onLanguage:ocaml",
+    "onLanguage:ocamllex",
+    "onLanguage:ocamlyacc"
+  ],
+  "main": "./out/src/extension",
+  "contributes": {
+    "languages": [
+      {
+        "id": "ocaml",
+        "aliases": [
+          "OCaml"
+        ],
+        "extensions": [
+          ".ml"
+        ],
+        "configuration": "./ocaml.configuration.json"
+      },
+      {
+        "id": "ocamllex",
+        "aliases": [
+          "OCamllex"
+        ],
+        "extensions": [
+          ".mll"
+        ],
+        "configuration": "./ocamllex.configuration.json"
+      },
+      {
+        "id": "ocamlyacc",
+        "aliases": [
+          "OCamlyacc"
+        ],
+        "extensions": [
+          ".mly"
+        ],
+        "configuration": "./ocamlyacc.configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "ocaml",
+        "scopeName": "source.ocaml",
+        "path": "./syntaxes/OCaml.tmLanguage"
+      },
+      {
+        "language": "ocamllex",
+        "scopeName": "source.ocamllex",
+        "path": "./syntaxes/OCamllex.tmLanguage"
+      },
+      {
+        "language": "ocamlyacc",
+        "scopeName": "source.ocamlyacc",
+        "path": "./syntaxes/OCamlyacc.tmLanguage"
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "OCaml configuration",
+      "properties": {
+        "ocaml.merlinPath": {
+          "type": "string",
+          "default": "ocamlmerlin"
+        },
+        "ocaml.lintDelay": {
+          "type": "number",
+          "default": 500
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "node ./node_modules/vscode/bin/compile",
+    "compile": "node ./node_modules/vscode/bin/compile -watch -p ./",
+    "postinstall": "node ./node_modules/vscode/bin/install"
+  },
+  "devDependencies": {
+    "typescript": "^1.8.5",
+    "vscode": "^0.11.0"
+  },
+  "dependencies": {
+  }
+}
