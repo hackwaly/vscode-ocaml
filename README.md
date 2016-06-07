@@ -13,7 +13,7 @@ This is an VS Code extension that provides OCaml language support.
 * Peek and goto definition (also provide a symbol list). _powered by ocamlmerlin_
 * Auto indent on your type. _powered by ocp-indent_ 
 
-![features](images/ocaml-ide.gif)
+![features](http://i.giphy.com/26BRsQmMAHdg1LNRe.gif)
 
 ## Features planned
 
