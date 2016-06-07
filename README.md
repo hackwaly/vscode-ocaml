@@ -1,65 +1,51 @@
-# vscode-ocaml README
+# OCaml support for VS Code
 
-This is the README for your extension "vscode-ocaml". After writing up a brief description, we recommend including the following sections.
+This is an VS Code extension that provides OCaml language support.
+
+> Status: pre-alpha.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+* Basic syntax highlighting for *.ml, *.mli, *.mly and *.mll. _ported from textmate_
+* Auto-completion (aka. IntelliSense). _powered by ocamlmerlin_
+* Error check on the fly (aka. Lint). _powered by ocamlmerlin_
+* Show type information on hover. _powered by ocamlmerlin_
+* Peek and goto definition (also provide a symbol list). _powered by ocamlmerlin_
+* Auto indent on your type. _powered by ocp-indent_ 
 
-For example if there is an image subfolder under your extension project workspace:
+\!\[features\]\(images/ocaml-ide.png\)
 
-\!\[feature X\]\(images/feature-x.png\)
+## Features planned
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+> Contributions are welcome.
+
+* Code snippets.
+* Debugger.
+* Build system.
+* Rename symbol (aka Refactor).
+* Semantic highlighting.
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+```shell
+opam install merlin
+opam install ocp-indent
+```
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
 This extension contributes the following settings:
 
-* `myExtension.enable`: enable/disable this extension
-* `myExtension.thing`: set to `blah` to do something
+* `ocaml.ocpIndentPath`: path to opc-indent.
+* `ocaml.merlinPath`: path to ocamlmerlin.
+* `ocaml.lintDelay`: time to delay lint when make changes.
 
 ## Known Issues
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
+### 0.1.0
 
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
------------------------------------------------------------------------------------------------------------
-
-## Working with Markdown
-
-**Note:** You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on OSX or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+CMD+V` on OSX or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux) or `Cmd+Space` (OSX) to see a list of Markdown snippets
-
-### For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+First published version.

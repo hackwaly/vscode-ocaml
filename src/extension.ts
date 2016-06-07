@@ -83,7 +83,7 @@ export function activate(context: vscode.ExtensionContext) {
             async provideOnTypeFormattingEdits(document, position, ch, options, token) {
                 return doOcpIndent(document.getText(), token);
             }
-        }, ' ', ';', '\n', ')', ']', '}')
+        }, ';', '\n')
     );
 
     context.subscriptions.push(
