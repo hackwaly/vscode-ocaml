@@ -16,6 +16,8 @@ This is an VS Code extension that provides OCaml language support.
 
 ![features](http://i.giphy.com/26BRsQmMAHdg1LNRe.gif)
 
+![debugger](http://i.giphy.com/l46Cx0HvCXnUrVOkU.gif)
+
 ## Requirements
 
 ```shell
