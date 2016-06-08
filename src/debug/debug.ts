@@ -17,7 +17,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 
 let uuid = require('uuid');
-let DEBUG = false;
+let DEBUG = true;
 let log = (msg) => {
     if (DEBUG) {
         console.log(msg);
@@ -157,7 +157,7 @@ class OCamlDebugSession extends DebugSession {
 
 		super.disconnectRequest(response, args);
     }
-    
+
     protected async launchRequest(response: DebugProtocol.LaunchResponse, args: LaunchRequestArguments) {
         let ocdArgs = [];
         if (args.cd) {
@@ -227,7 +227,7 @@ class OCamlDebugSession extends DebugSession {
         } else if (args.source.path) {
             module = this.getModuleFromFilename(args.source.path);
         }
-        
+
         let doSetBreakpoint = async (line, column) => {
             return new Promise((resolve) => {
                 this.ocdCommand(['break', '@', module, line, column], (output) => {
@@ -235,7 +235,7 @@ class OCamlDebugSession extends DebugSession {
                     let breakpoint = null;
                     if (match) {
                         let filename = match[2];
-                        if (!this._moduleToPath.has(module) && args.source.path && path.basename(args.source.path) === filename) {
+                        if (!this._moduleToPath.has(module) && args.source.path && args.source.path.endsWith(filename)) {
                             this._moduleToPath.set(module, args.source.path);
                         }
                         breakpoint = new Breakpoint(
@@ -271,12 +271,12 @@ class OCamlDebugSession extends DebugSession {
             breakpoints.push(breakpoint);
         }
 
-        this._breakpoints.set(module, breakpoints);        
-        
+        this._breakpoints.set(module, breakpoints);
+
         response.body = { breakpoints };
         this.sendResponse(response);
     }
-    
+
     protected continueRequest(response: DebugProtocol.ContinueResponse, args: DebugProtocol.ContinueArguments) {
         this.ocdCommand('run', this.parseEvent.bind(this));
         this.sendResponse(response);
@@ -286,7 +286,7 @@ class OCamlDebugSession extends DebugSession {
         this.ocdCommand('next', this.parseEvent.bind(this));
         this.sendResponse(response);
     }
-    
+
     protected stepInRequest(response: DebugProtocol.StepInResponse, args: DebugProtocol.StepInArguments): void {
         this.ocdCommand(['step', 1], this.parseEvent.bind(this));
         this.sendResponse(response);
@@ -336,14 +336,14 @@ class OCamlDebugSession extends DebugSession {
     retrieveSource(module) {
         return new Promise<string>((resolve) => {
             this.ocdCommand(['list', module, 1, 100000], (output: string) => {
-                let lines = output.replace(/<\|b\|>/g, '').split(/\n/g);
+                let lines = output.replace(/<\|[a-z]+\|>/g, '').split(/\n/g);
                 let num_prefix = lines.length.toString().length;
                 let content = lines.map((line) => line.substring(num_prefix)).join('\n');
                 resolve(content);
             });
         });
     }
-    
+
     protected async sourceRequest(response: DebugProtocol.SourceResponse, args: DebugProtocol.SourceArguments) {
         let module = this._modules[args.sourceReference - 1];
         let content = await this.retrieveSource(module);
