@@ -2,7 +2,7 @@
 
 This is an VS Code extension that provides OCaml language support.
 
-> Status: pre-alpha.
+> Contributions are welcome. [github repo](https://github.com/hackwaly/vscode-ocaml.git)
 
 ## Features
 
@@ -12,18 +12,9 @@ This is an VS Code extension that provides OCaml language support.
 * Show type information on hover. _powered by ocamlmerlin_
 * Peek and goto definition (also provide a symbol list). _powered by ocamlmerlin_
 * Auto indent on your type. _powered by ocp-indent_ 
+* Debugger (not support windows). _powered by ocamldebug_
 
 ![features](http://i.giphy.com/26BRsQmMAHdg1LNRe.gif)
-
-## Features planned
-
-> Contributions are welcome.
-
-* Code snippets.
-* Debugger.
-* Build system.
-* Rename symbol (aka Refactor).
-* Semantic highlighting.
 
 ## Requirements
 

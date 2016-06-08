@@ -72,8 +72,8 @@
     "debuggers": [
       {
         "type": "ocamldebug",
-        "label": "OCaml Debug",
-        "program": "./out/ocamldebug.js",
+        "label": "OCaml",
+        "program": "./out/src/debug/debug.js",
         "runtime": "node",
         "enableBreakpointsFor": {
           "languageIds": [
@@ -82,20 +82,39 @@
         },
         "initialConfigurations": [
           {
-            "launch": {
-              "required": [
-                "program"
-              ],
-              "properties": {
-                "program": {
-                  "type": "string",
-                  "default": "${workspaceRoot}/main.byte"
-                }
+            "name": "OCaml",
+            "type": "ocamldebug",
+            "request": "launch",
+            "program": "${workspaceRoot}/main.d.byte",
+            "stopOnEntry": false
+          }
+        ],
+        "configurationAttributes": {
+          "launch": {
+            "required": [
+              "program"
+            ],
+            "properties": {
+              "cd": {
+                "type": "string",
+                "description": "The working directory for ocamldebug."
+              },
+              "program": {
+                "type": "string",
+                "description": "The path of program to debug."
+              },
+              "arguments": {
+                "type": "string",
+                "description": "The command-line arguments for the program."
+              },
+              "stopOnEntry": {
+                "type": "boolean",
+                "description": "Automatically stop after launch.",
+                "default": false
               }
             }
           }
-        ],
-        "configurationAttributes": {}
+        }
       }
     ],
     "configuration": {
@@ -127,6 +146,9 @@
     "vscode": "^0.11.0"
   },
   "dependencies": {
-    "get-stream": "^2.2.1"
+    "get-stream": "^2.2.1",
+    "uuid": "^2.0.2",
+    "vscode-debugadapter": "^1.9.0",
+    "vscode-debugprotocol": "^1.9.0"
   }
 }
