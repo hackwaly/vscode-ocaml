@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "vscode-ocaml",
+  "name": "ocaml",
   "displayName": "OCaml",
   "description": "Rich OCaml language support for Visual Studio Code",
   "version": "0.2.1",
