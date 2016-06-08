@@ -6,6 +6,7 @@ import {
     InitializedEvent,
     StoppedEvent,
     TerminatedEvent,
+    BreakpointEvent,
     OutputEvent,
     Handles
 } from 'vscode-debugadapter';
@@ -16,13 +17,18 @@ import * as fs from 'fs';
 import * as os from 'os';
 
 let uuid = require('uuid');
+let DEBUG = false;
+let log = (msg) => {
+    if (DEBUG) {
+        console.log(msg);
+    }
+};
 
 interface LaunchRequestArguments {
     cd: string;
     program: string;
     arguments: string;
     stopOnEntry: boolean;
-    files: string[];
 }
 
 class SourceSource {
@@ -39,8 +45,8 @@ class OCamlDebugSession extends DebugSession {
     private _progStdout: stream.Readable;
     private _progStderr: stream.Readable;
     private _breakpoints: Map<string, Breakpoint[]>;
-    private _sourceHandles = new Handles<SourceSource>();
     private _modules = [];
+    private _moduleToPath = new Map<string, string>();
 
     constructor() {
         super();
@@ -52,7 +58,7 @@ class OCamlDebugSession extends DebugSession {
         }
 
         this._wait = this._wait.then(() => {
-            console.log(`cmd: ${cmd}`);
+            log(`cmd: ${cmd}`);
             this._ocdProc.stdin.write(cmd + '\n');
             return this.readUntilPrompt().then((output) => { callback(output) });
         });
@@ -66,7 +72,7 @@ class OCamlDebugSession extends DebugSession {
                 if (buffer.slice(-6) === '(ocd) ') {
                     let output = buffer.slice(0, -6);
                     output = output.replace(/\n$/, '');
-                    console.log(`ocd: ${JSON.stringify(output)}`);
+                    log(`ocd: ${JSON.stringify(output)}`);
                     resolve(output);
                     this._ocdProc.stdout.removeListener('data', onData);
                     return;
@@ -90,12 +96,15 @@ class OCamlDebugSession extends DebugSession {
     }
 
     getSource(module: string) {
+        let filename = module.toLowerCase() + '.ml';
+        if (this._moduleToPath.has(module)) {
+            return new Source(filename, this._moduleToPath.get(module));
+        }
         let index = this._modules.indexOf(module);
         if (index === -1) {
             index = this._modules.length;
             this._modules.push(module);
         }
-        let filename = module.toLowerCase() + '.ml';
         return new Source(filename, null, index + 1, 'source');
     }
 
@@ -114,6 +123,21 @@ class OCamlDebugSession extends DebugSession {
         if (this._ocdProc) {
             this._ocdProc.kill();
         }
+
+        if (this._progStdout) {
+            this._progStdout.removeAllListeners();
+            if (this._progStdout['destroy']) {
+                this._progStdout['destroy']();
+            }
+        }
+
+        if (this._progStderr) {
+            this._progStderr.removeAllListeners();
+            if (this._progStderr['destroy']) {
+                this._progStderr['destroy']();
+            }
+        }
+
         if (this._progStdoutPipeName) {
             child_process.exec(`rm ${this._progStdoutPipeName}`);
         }
@@ -124,6 +148,7 @@ class OCamlDebugSession extends DebugSession {
         this._ocdProc = null;
         this._breakpoints = null;
         this._modules = [];
+        this._moduleToPath.clear();
 
         this._progStdoutPipeName = null;
         this._progStderrPipeName = null;
@@ -209,13 +234,19 @@ class OCamlDebugSession extends DebugSession {
                     let match = /^Breakpoint (\d+) at \d+: file ([^,]+), line (\d+), characters (\d+)-(\d+)$/m.exec(output);
                     let breakpoint = null;
                     if (match) {
+                        let filename = match[2];
+                        if (!this._moduleToPath.has(module) && args.source.path && path.basename(args.source.path) === filename) {
+                            this._moduleToPath.set(module, args.source.path);
+                        }
                         breakpoint = new Breakpoint(
                             true,
                             +match[3],
                             +match[4],
-                            this.getSource(this.getModuleFromFilename(match[2]))
+                            this.getSource(this.getModuleFromFilename(filename))
                         );
                         breakpoint[OCamlDebugSession.BREAKPOINT_ID] = +match[1];
+                    } else {
+                        breakpoint = new Breakpoint(false);
                     }
                     resolve(breakpoint);
                 });
@@ -237,9 +268,7 @@ class OCamlDebugSession extends DebugSession {
 
         for (let {line, column} of args.breakpoints) {
             let breakpoint = await doSetBreakpoint(line, column);
-            if (breakpoint !== null) {
-                breakpoints.push(breakpoint);
-            }
+            breakpoints.push(breakpoint);
         }
 
         this._breakpoints.set(module, breakpoints);        
@@ -307,7 +336,7 @@ class OCamlDebugSession extends DebugSession {
     retrieveSource(module) {
         return new Promise<string>((resolve) => {
             this.ocdCommand(['list', module, 1, 100000], (output: string) => {
-                let lines = output.split(/\n/g);
+                let lines = output.replace(/<\|b\|>/g, '').split(/\n/g);
                 let num_prefix = lines.length.toString().length;
                 let content = lines.map((line) => line.substring(num_prefix)).join('\n');
                 resolve(content);

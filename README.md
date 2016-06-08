@@ -37,6 +37,10 @@ This extension contributes the following settings:
 
 ## Release Notes
 
+### 0.2.0
+
+Add debugger (ocamldebug) support.
+
 ### 0.1.0
 
 First published version.
