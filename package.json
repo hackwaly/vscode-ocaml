@@ -3,7 +3,7 @@
   "name": "vscode-ocaml",
   "displayName": "OCaml",
   "description": "Rich OCaml language support for Visual Studio Code",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "publisher": "hackwaly",
   "engines": {
     "vscode": "^1.0.0"
