@@ -6,12 +6,12 @@ This is an VS Code extension that provides OCaml language support.
 
 ## Features
 
-* Basic syntax highlighting for *.ml, *.mli, *.mly and *.mll. _ported from textmate_
+* Basic syntax highlighting for `*.ml`, `*.mli`, `*.mly` and `*.mll`. _ported from textmate_
 * Auto-completion (aka. IntelliSense). _powered by ocamlmerlin_
 * Error check on the fly (aka. Lint). _powered by ocamlmerlin_
 * Show type information on hover. _powered by ocamlmerlin_
 * Peek and goto definition (also provide a symbol list). _powered by ocamlmerlin_
-* Auto indent on your type. _powered by ocp-indent_ 
+* Auto indent on your type. _powered by ocp-indent_
 * Debugger (not support windows). _powered by ocamldebug_
 
 ![features](http://i.giphy.com/26BRsQmMAHdg1LNRe.gif)
@@ -29,13 +29,19 @@ opam install ocp-indent
 
 This extension contributes the following settings:
 
-* `ocaml.ocpIndentPath`: path to opc-indent.
+* `ocaml.ocpIndentPath`: path to ocp-indent.
 * `ocaml.merlinPath`: path to ocamlmerlin.
 * `ocaml.lintDelay`: time to delay lint when make changes.
 
 ## Known Issues
 
+In VS Code, `*.ml` is associated to F# by default, You need manually config this to make OCaml mode work with *.ml file.
 
+```
+"files.associations": {
+    "*.ml": "ocaml"
+}
+```
 
 ## Release Notes
 
