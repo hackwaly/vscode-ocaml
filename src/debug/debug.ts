@@ -336,7 +336,7 @@ class OCamlDebugSession extends DebugSession {
     retrieveSource(module) {
         return new Promise<string>((resolve) => {
             this.ocdCommand(['list', module, 1, 100000], (output: string) => {
-                let lines = output.replace(/<\|[a-z]+\|>/g, '').split(/\n/g);
+                let lines = output.replace(/^(\s*)<\|[a-z]+\|>/mg, '$1').split(/\n/g);
                 let num_prefix = lines.length.toString().length;
                 let content = lines.map((line) => line.substring(num_prefix)).join('\n');
                 resolve(content);
