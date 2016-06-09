@@ -17,7 +17,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 
 let uuid = require('uuid');
-let DEBUG = true;
+let DEBUG = false;
 let log = (msg) => {
     if (DEBUG) {
         console.log(msg);
@@ -32,7 +32,7 @@ interface LaunchRequestArguments {
 }
 
 class SourceSource {
-    constructor(public module: string, public content?: string) {}
+    constructor(public module: string, public content?: string) { }
 }
 
 class OCamlDebugSession extends DebugSession {
@@ -115,7 +115,7 @@ class OCamlDebugSession extends DebugSession {
             return;
         }
         response.body.supportsConfigurationDoneRequest = true;
-        response.body.supportsFunctionBreakpoints = true;
+        // response.body.supportsFunctionBreakpoints = true;
         this.sendResponse(response);
     }
 
@@ -155,7 +155,7 @@ class OCamlDebugSession extends DebugSession {
         this._progStdout = null;
         this._progStderr = null;
 
-		super.disconnectRequest(response, args);
+        super.disconnectRequest(response, args);
     }
 
     protected async launchRequest(response: DebugProtocol.LaunchResponse, args: LaunchRequestArguments) {
@@ -193,7 +193,7 @@ class OCamlDebugSession extends DebugSession {
 
         this._progStderr = fs.createReadStream(this._progStderrPipeName);
         this._progStderr.on('data', (chunk) => {
-            this.sendEvent(new OutputEvent(chunk.toString('utf-8'), 'stdout'));
+            this.sendEvent(new OutputEvent(chunk.toString('utf-8'), 'stderr'));
         });
 
         this._ocdProc = child_process.spawn('ocamldebug', ocdArgs);
@@ -297,9 +297,9 @@ class OCamlDebugSession extends DebugSession {
     }
 
     protected threadsRequest(response: DebugProtocol.ThreadsResponse) {
-		response.body = {threads: [new Thread(0, 'main')]};
-		this.sendResponse(response);
-	}
+        response.body = { threads: [new Thread(0, 'main')] };
+        this.sendResponse(response);
+    }
 
     protected stackTraceRequest(response: DebugProtocol.StackTraceResponse, args: DebugProtocol.StackTraceArguments) {
         this.ocdCommand(['backtrace', 100], (text) => {

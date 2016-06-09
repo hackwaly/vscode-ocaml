@@ -23,7 +23,7 @@ let doOcpIndent = async (code: string, token: vscode.CancellationToken) => {
     cp.unref();
     if (token.isCancellationRequested) return null;
 
-    let newIndents =  output.trim().split(/\n/g).map((n) => +n);
+    let newIndents = output.trim().split(/\n/g).map((n) => +n);
     let oldIndents = code.split(/\n/g).map((line) => /^\s*/.exec(line)[0]);
 
     let edits = [];
@@ -62,7 +62,7 @@ export function activate(context: vscode.ExtensionContext) {
         return new vscode.Position(pos.line - 1, pos.col);
     };
     let fromVsPos = (pos: vscode.Position) => {
-        return {line: pos.line + 1, col: pos.character};
+        return { line: pos.line + 1, col: pos.character };
     };
     let toVsRange = (start, end) => {
         return new vscode.Range(toVsPos(start), toVsPos(end));
@@ -218,7 +218,7 @@ export function activate(context: vscode.ExtensionContext) {
                     type = `type _ = ${type}`;
                 }
 
-                return new vscode.Hover({language: 'ocaml', value: type}, toVsRange(start, end));
+                return new vscode.Hover({ language: 'ocaml', value: type }, toVsRange(start, end));
             }
         })
     );
