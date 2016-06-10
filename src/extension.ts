@@ -47,17 +47,6 @@ let doOcpIndent = async (code: string, token: vscode.CancellationToken) => {
 export function activate(context: vscode.ExtensionContext) {
     let session = new OCamlMerlinSession();
 
-    let syncBuffer = async (document, token) => {
-        await session.request(['checkout', 'auto', document.fileName]);
-        if (token.isCancellationRequested) return null;
-
-        await session.request(['seek', 'exact', { line: 1, col: 0 }]);
-        if (token.isCancellationRequested) return null;
-
-        await session.request(['tell', 'source-eof', document.getText()]);
-        if (token.isCancellationRequested) return null;
-    };
-
     let toVsPos = (pos) => {
         return new vscode.Position(pos.line - 1, pos.col);
     };
@@ -95,7 +84,9 @@ export function activate(context: vscode.ExtensionContext) {
                 ));
                 let prefix = /[A-Za-z_][A-Za-z_'0-9]*(?:\.[A-Za-z_][A-Za-z_'0-9]*)*\.?$/.exec(line)[0];
 
-                await syncBuffer(document, token);
+                await session.syncBuffer(document.fileName, document.getText(), token);
+                if (token.isCancellationRequested) return null;
+
                 let [status, result] = await session.request(['complete', 'prefix', prefix, 'at', fromVsPos(position)]);
                 if (token.isCancellationRequested) return null;
 
@@ -130,7 +121,8 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.languages.registerDefinitionProvider(ocamlLang, {
             async provideDefinition(document, position, token) {
-                await syncBuffer(document, token);
+                await session.syncBuffer(document.fileName, document.getText(), token);
+                if (token.isCancellationRequested) return null;
 
                 for (let kind of ['ml', 'mli']) {
                     let [status, result] = await session.request(['locate', null, 'ml', 'at', fromVsPos(position)]);
@@ -156,7 +148,8 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.languages.registerDocumentSymbolProvider(ocamlLang, {
             async provideDocumentSymbols(document, token) {
-                await syncBuffer(document, token);
+                await session.syncBuffer(document.fileName, document.getText(), token);
+                if (token.isCancellationRequested) return null;
 
                 let [status, result] = await session.request(['outline']);
                 if (token.isCancellationRequested) return null;
@@ -196,7 +189,8 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.languages.registerHoverProvider(ocamlLang, {
             async provideHover(document, position, token) {
-                await syncBuffer(document, token);
+                await session.syncBuffer(document.fileName, document.getText(), token);
+                if (token.isCancellationRequested) return null;
 
                 let [status, result] = await session.request(['type', 'enclosing', 'at', fromVsPos(position)]);
                 if (token.isCancellationRequested) return null;
@@ -223,8 +217,9 @@ export function activate(context: vscode.ExtensionContext) {
         })
     );
 
-    let provideLinter = async (document, token) => {
-        await syncBuffer(document, token);
+    let provideLinter = async (document: vscode.TextDocument, token) => {
+        await session.syncBuffer(document.fileName, document.getText(), token);
+        if (token.isCancellationRequested) return null;
 
         let [status, result] = await session.request(['errors']);
         if (token.isCancellationRequested) return null;
