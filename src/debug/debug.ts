@@ -15,14 +15,9 @@ import * as path from 'path';
 import * as stream from 'stream';
 import * as fs from 'fs';
 import * as os from 'os';
+import {log} from '../utils';
 
 let uuid = require('uuid');
-let DEBUG = false;
-let log = (msg) => {
-    if (DEBUG) {
-        console.log(msg);
-    }
-};
 
 interface LaunchRequestArguments {
     cd: string;
