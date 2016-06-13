@@ -832,6 +832,10 @@
 			</array>
 		</dict>
 		<dict>
+			<key>match</key>
+			<string>\b(exception)\s+([A-Z][a-zA-Z0-9'_]*)(?:\s+(of))?\b</string>
+			<key>name</key>
+			<string>meta.exception.ocaml</string>
 			<key>captures</key>
 			<dict>
 				<key>1</key>
@@ -844,11 +848,12 @@
 					<key>name</key>
 					<string>entity.name.type.exception.ocaml</string>
 				</dict>
+				<key>3</key>
+				<dict>
+					<key>name</key>
+					<string>keyword.other.ocaml</string>
+				</dict>
 			</dict>
-			<key>match</key>
-			<string>\b(exception)\s+([A-Z][a-zA-Z0-9'_]*)\b</string>
-			<key>name</key>
-			<string>meta.exception.ocaml</string>
 		</dict>
 		<dict>
 			<key>begin</key>
