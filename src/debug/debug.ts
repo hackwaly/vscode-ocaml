@@ -160,9 +160,6 @@ class OCamlDebugSession extends DebugSession {
         }
 
         ocdArgs.push(args.program);
-        if (args.arguments) {
-            ocdArgs.push(arguments);
-        }
         this._launchArgs = args;
         this._progStdoutPipeName = path.resolve(os.tmpdir(), uuid());
         this._progStderrPipeName = path.resolve(os.tmpdir(), uuid());
@@ -195,7 +192,7 @@ class OCamlDebugSession extends DebugSession {
         this._breakpoints = new Map();
 
         this.ocdCommand([
-            'set', 'arguments', `> ${this._progStdoutPipeName}`, `2> ${this._progStderrPipeName}`
+            'set', 'arguments', this._launchArgs.arguments || '', `> ${this._progStdoutPipeName}`, `2> ${this._progStderrPipeName}`
         ], () => { });
         this.ocdCommand(['goto', 0], () => { });
 
