@@ -49,7 +49,6 @@ In VS Code, `*.ml` is associated to F# by default, You need manually config this
 
 Add keywords completion.
 Add Menhir syntax over OCamlyacc syntax.
-Fix `exception` with `of` syntax.
 
 ### 0.2.0
 
