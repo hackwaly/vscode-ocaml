@@ -1175,7 +1175,7 @@
 		</dict>
 		<dict>
 			<key>match</key>
-			<string>\b(as|assert|class|constraint|exception|functor|in|include|inherit|initializer|lazy|let|mod|module|mutable|new|object|open|private|rec|sig|struct|type|virtual)\b</string>
+			<string>\b(as|assert|class|constraint|exception|external|functor|in|include|inherit|initializer|lazy|let|mod|module|mutable|new|object|open|private|rec|sig|struct|type|virtual)\b</string>
 			<key>name</key>
 			<string>keyword.other.ocaml</string>
 		</dict>

@@ -45,6 +45,12 @@ In VS Code, `*.ml` is associated to F# by default, You need manually config this
 
 ## Release Notes
 
+### 0.3.0
+
+Add keywords completion.
+Add Menhir syntax over OCamlyacc syntax.
+Fix `exception` with `of` syntax.
+
 ### 0.2.0
 
 Add debugger (ocamldebug) support.
