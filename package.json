@@ -3,7 +3,7 @@
   "name": "ocaml",
   "displayName": "OCaml",
   "description": "Rich OCaml language support for Visual Studio Code",
-  "version": "0.2.5",
+  "version": "0.3.0",
   "publisher": "hackwaly",
   "icon": "images/colour-icon.svg",
   "engines": {
@@ -11,12 +11,13 @@
   },
   "categories": [
     "Languages",
+    "Linters",
     "Debuggers"
   ],
   "activationEvents": [
     "onLanguage:ocaml",
     "onLanguage:ocamllex",
-    "onLanguage:ocamlyacc"
+    "onLanguage:menhir"
   ],
   "main": "./out/src/extension",
   "contributes": {
@@ -43,14 +44,15 @@
         "configuration": "./ocamllex.configuration.json"
       },
       {
-        "id": "ocamlyacc",
+        "id": "menhir",
         "aliases": [
+          "Menhir",
           "OCamlyacc"
         ],
         "extensions": [
           ".mly"
         ],
-        "configuration": "./ocamlyacc.configuration.json"
+        "configuration": "./menhir.configuration.json"
       }
     ],
     "grammars": [
@@ -65,9 +67,15 @@
         "path": "./syntaxes/OCamllex.tmLanguage"
       },
       {
-        "language": "ocamlyacc",
-        "scopeName": "source.ocamlyacc",
-        "path": "./syntaxes/OCamlyacc.tmLanguage"
+        "language": "menhir",
+        "scopeName": "source.menhir",
+        "path": "./syntaxes/Menhir.tmLanguage"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "menhir",
+        "path": "./snippets/menhir.json"
       }
     ],
     "debuggers": [

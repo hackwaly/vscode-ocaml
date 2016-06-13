@@ -77,7 +77,7 @@
 		</dict>
 		<dict>
 			<key>begin</key>
-			<string>(rule|and)\s+([a-z][a-zA-Z0-9_]*)\s+(=)\s+(parse)(?=\s*$)|((?&lt;!\|)(\|)(?!\|))</string>
+			<string>(rule|and)\s+([a-z][a-zA-Z0-9_]*)((?:\s+(?:[a-z][a-zA-Z0-9_]*))*)\s+(=)\s+(parse)(?=\s*$)|((?&lt;!\|)(\|)(?!\|))</string>
 			<key>beginCaptures</key>
 			<dict>
 				<key>1</key>
@@ -92,15 +92,27 @@
 				</dict>
 				<key>3</key>
 				<dict>
-					<key>name</key>
-					<string>keyword.operator.ocamllex</string>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>match</key>
+							<string>[a-z][a-zA-Z0-9_]*</string>
+							<key>name</key>
+                			<string>variable.parameter.rule.ocamllex</string>
+						</dict>
+					</array>
 				</dict>
 				<key>4</key>
 				<dict>
 					<key>name</key>
-					<string>keyword.other.ocamllex</string>
+					<string>keyword.operator.ocamllex</string>
 				</dict>
 				<key>5</key>
+				<dict>
+					<key>name</key>
+					<string>keyword.other.ocamllex</string>
+				</dict>
+				<key>6</key>
 				<dict>
 					<key>name</key>
 					<string>punctuation.separator.match-pattern.ocamllex</string>
@@ -321,12 +333,6 @@
 				</dict>
 				<dict>
 					<key>match</key>
-					<string>[a-z][a-zA-Z0-9'_]</string>
-					<key>name</key>
-					<string>entity.name.type.pattern.reference.stupid-goddamn-hack.ocamllex</string>
-				</dict>
-				<dict>
-					<key>match</key>
 					<string>\bas\b</string>
 					<key>name</key>
 					<string>keyword.other.pattern.ocamllex</string>
@@ -342,6 +348,12 @@
 					<string>_</string>
 					<key>name</key>
 					<string>constant.language.universal-match.ocamllex</string>
+				</dict>
+				<dict>
+					<key>match</key>
+					<string>[a-z][a-zA-Z0-9'_]</string>
+					<key>name</key>
+					<string>entity.name.type.pattern.reference.stupid-goddamn-hack.ocamllex</string>
 				</dict>
 				<dict>
 					<key>begin</key>

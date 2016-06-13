@@ -44,6 +44,8 @@ let doOcpIndent = async (code: string, token: vscode.CancellationToken) => {
     return edits;
 };
 
+let ocamlKeywords = 'and|as|assert|begin|class|constraint|do|done|downto|else|end|exception|external|false|for|fun|function|functor|if|in|include|inherit|inherit!|initializer|lazy|let|match|method|method!|module|mutable|new|object|of|open|open!|or|private|rec|sig|struct|then|to|true|try|type|val|val!|virtual|when|while|with'.split('|');
+
 export function activate(context: vscode.ExtensionContext) {
     let session = new OCamlMerlinSession();
 
@@ -78,6 +80,18 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.languages.registerCompletionItemProvider(ocamlLang, {
             async provideCompletionItems(document, position, token) {
+                return new vscode.CompletionList(ocamlKeywords.map((keyword) => {
+                    let completionItem = new vscode.CompletionItem(keyword);
+                    completionItem.kind = vscode.CompletionItemKind.Keyword;
+                    return completionItem;
+                }));
+            }
+        })
+    );
+
+    context.subscriptions.push(
+        vscode.languages.registerCompletionItemProvider(ocamlLang, {
+            async provideCompletionItems(document, position, token) {
                 let line = document.getText(new vscode.Range(
                     new vscode.Position(position.line, 0),
                     position
@@ -91,7 +105,7 @@ export function activate(context: vscode.ExtensionContext) {
                 if (token.isCancellationRequested) return null;
 
                 if (status !== 'return') return;
-
+                
                 return new vscode.CompletionList(result.entries.map(({name, kind, desc, info}) => {
                     let completionItem = new vscode.CompletionItem(name);
                     let toVsKind = (kind) => {
