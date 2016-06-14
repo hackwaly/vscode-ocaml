@@ -40,8 +40,8 @@ class OCamlDebugSession extends DebugSession {
     private _progStdout: stream.Readable;
     private _progStderr: stream.Readable;
     private _breakpoints: Map<string, Breakpoint[]>;
-    private _modules = [];
-    private _moduleToPath = new Map<string, string>();
+    private _filenames = [];
+    private _filenameToPath = new Map<string, string>();
 
     constructor() {
         super();
@@ -92,20 +92,26 @@ class OCamlDebugSession extends DebugSession {
     }
 
     getModuleFromFilename(filename) {
-        return path.basename(filename, '.ml').replace(/^[a-z]/, (c) => c.toUpperCase());
+        return path.basename(filename).split(/\./g)[0].replace(/^[a-z]/, (c) => c.toUpperCase());
     }
 
-    getSource(module: string) {
-        let filename = module.toLowerCase() + '.ml';
-        if (this._moduleToPath.has(module)) {
-            return new Source(filename, this._moduleToPath.get(module));
+    getSource(filename: string) {
+        if (this._filenameToPath.has(filename)) {
+            return new Source(filename, this._filenameToPath.get(filename));
         }
-        let index = this._modules.indexOf(module);
+        let index = this._filenames.indexOf(filename);
         if (index === -1) {
-            index = this._modules.length;
-            this._modules.push(module);
+            index = this._filenames.length;
+            this._filenames.push(filename);
         }
-        return new Source(filename, null, index + 1, 'source');
+
+        let sourcePath = null;        
+        let testPath = path.resolve(path.dirname(this._launchArgs.program), filename);
+        // TODO: check against list command.
+        if (fs.existsSync(testPath)) {
+            sourcePath = testPath;
+        }
+        return new Source(filename, sourcePath, index + 1, 'source');
     }
 
     protected initializeRequest(response: DebugProtocol.InitializeResponse, args: DebugProtocol.InitializeRequestArguments): void {
@@ -147,8 +153,8 @@ class OCamlDebugSession extends DebugSession {
 
         this._ocdProc = null;
         this._breakpoints = null;
-        this._modules = [];
-        this._moduleToPath.clear();
+        this._filenames = [];
+        this._filenameToPath.clear();
 
         this._progStdoutPipeName = null;
         this._progStderrPipeName = null;
@@ -220,7 +226,7 @@ class OCamlDebugSession extends DebugSession {
         let module;
 
         if (args.source.sourceReference > 0) {
-            module = this._modules[args.source.sourceReference - 1];
+            module = this.getModuleFromFilename(this._filenames[args.source.sourceReference - 1]);
         } else if (args.source.path) {
             module = this.getModuleFromFilename(args.source.path);
         }
@@ -232,14 +238,14 @@ class OCamlDebugSession extends DebugSession {
                     let breakpoint = null;
                     if (match) {
                         let filename = match[2];
-                        if (!this._moduleToPath.has(module) && args.source.path && args.source.path.endsWith(filename)) {
-                            this._moduleToPath.set(module, args.source.path);
+                        if (!this._filenameToPath.has(filename) && args.source.path && args.source.path.endsWith(filename)) {
+                            this._filenameToPath.set(filename, args.source.path);
                         }
                         breakpoint = new Breakpoint(
                             true,
                             +match[3],
                             +match[4],
-                            this.getSource(this.getModuleFromFilename(filename))
+                            this.getSource(filename)
                         );
                         breakpoint[OCamlDebugSession.BREAKPOINT_ID] = +match[1];
                     } else {
@@ -309,7 +315,7 @@ class OCamlDebugSession extends DebugSession {
                     return new StackFrame(
                         +match[1],
                         '',
-                        this.getSource(match[2]),
+                        this.getSource(match[3]),
                         +match[4],
                         +match[5]
                     );
@@ -333,16 +339,26 @@ class OCamlDebugSession extends DebugSession {
     retrieveSource(module) {
         return new Promise<string>((resolve) => {
             this.ocdCommand(['list', module, 1, 100000], (output: string) => {
-                let lines = output.replace(/^(\s*)<\|[a-z]+\|>/mg, '$1').split(/\n/g);
-                let num_prefix = lines.length.toString().length;
-                let content = lines.map((line) => line.substring(num_prefix)).join('\n');
+                let lines = output.split(/\n/g);
+
+                let lastLine = lines[lines.length - 1];
+                if (lastLine === 'Position out of range.') {
+                    lines.pop();
+                }
+
+                let content = lines.map((line) => {
+                    // FIXME: make sure do not accidently replace "<|a|>" in a string or comment.
+                    return line.replace(/^\d+ /, '').replace(/<\|[a-z]+\|>/, '$1');
+                }).join('\n');           
+
                 resolve(content);
             });
         });
     }
 
     protected async sourceRequest(response: DebugProtocol.SourceResponse, args: DebugProtocol.SourceArguments) {
-        let module = this._modules[args.sourceReference - 1];
+        let filename = this._filenames[args.sourceReference - 1];
+        let module = this.getModuleFromFilename(filename);
         let content = await this.retrieveSource(module);
         response.body = { content };
         this.sendResponse(response);
