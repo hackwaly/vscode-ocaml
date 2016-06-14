@@ -80,6 +80,11 @@ class OCamlDebugSession extends DebugSession {
     parseEvent(output) {
         if (output.indexOf('Program exit.') >= 0) {
             this.sendEvent(new TerminatedEvent());
+        } else if (output.indexOf('Program end.') >= 0) { 
+            let index = output.indexOf('Program end.');
+            let reason = output.substring(index + 'Program end.'.length);
+            this.sendEvent(new OutputEvent(reason));
+            this.sendEvent(new TerminatedEvent());
         } else {
             let reason = output.indexOf('Breakpoint:') >= 0 ? 'breakpoint' : 'step';
             this.sendEvent(new StoppedEvent(reason, 0));
