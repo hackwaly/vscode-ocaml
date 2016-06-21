@@ -1,5 +1,5 @@
 export let log = (msg) => {
-    if (process.env.DEBUG_VSCODE_OCAML) {
+    if (true) {
         console.log(msg);
     }
 };

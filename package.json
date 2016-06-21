@@ -115,13 +115,20 @@
                 "description": "The path of program to debug."
               },
               "arguments": {
-                "type": "string",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
                 "description": "The command-line arguments for the program."
               },
               "stopOnEntry": {
                 "type": "boolean",
                 "description": "Automatically stop after launch.",
                 "default": false
+              },
+              "socket": {
+                "type": "string",
+                "description": "A socket name or address for remote debug."
               }
             }
           }
@@ -157,8 +164,9 @@
     "vscode": "^0.11.0"
   },
   "dependencies": {
+    "freeport": "^1.0.5",
     "get-stream": "^2.2.1",
-    "uuid": "^2.0.2",
+    "tiny-promisify": "^0.1.1",
     "vscode-debugadapter": "^1.9.0",
     "vscode-debugprotocol": "^1.9.0"
   }

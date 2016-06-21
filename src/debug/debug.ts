@@ -12,18 +12,18 @@ import {
 } from 'vscode-debugadapter';
 import {DebugProtocol} from 'vscode-debugprotocol';
 import * as path from 'path';
-import * as stream from 'stream';
 import * as fs from 'fs';
-import * as os from 'os';
 import {log} from '../utils';
 
-let uuid = require('uuid');
+let promisify = require('tiny-promisify');
+let freeport = promisify(require('freeport'));
 
 interface LaunchRequestArguments {
     cd: string;
     program: string;
-    arguments: string;
+    arguments?: string[];
     stopOnEntry: boolean;
+    socket?: string;
 }
 
 class SourceSource {
@@ -33,12 +33,11 @@ class SourceSource {
 class OCamlDebugSession extends DebugSession {
     private static BREAKPOINT_ID = Symbol();
     private _launchArgs: LaunchRequestArguments;
-    private _ocdProc: child_process.ChildProcess;
+    private _debuggeeProc: child_process.ChildProcess;
+    private _debuggerProc: child_process.ChildProcess;
     private _wait = Promise.resolve();
-    private _progStdoutPipeName: string;
-    private _progStderrPipeName: string;
-    private _progStdout: stream.Readable;
-    private _progStderr: stream.Readable;
+    private _remoteMode: boolean = false;
+    private _socket: string;
     private _breakpoints: Map<string, Breakpoint[]>;
     private _filenames = [];
     private _filenameToPath = new Map<string, string>();
@@ -47,33 +46,34 @@ class OCamlDebugSession extends DebugSession {
         super();
     }
 
-    ocdCommand(cmd, callback) {
+    ocdCommand(cmd, callback, callback2?) {
         if (Array.isArray(cmd)) {
             cmd = cmd.join(' ');
         }
 
         this._wait = this._wait.then(() => {
             log(`cmd: ${cmd}`);
-            this._ocdProc.stdin.write(cmd + '\n');
-            return this.readUntilPrompt().then((output) => { callback(output) });
+            this._debuggerProc.stdin.write(cmd + '\n');
+            return this.readUntilPrompt(callback2).then((output) => { callback(output) });
         });
     }
 
-    readUntilPrompt() {
+    readUntilPrompt(callback?) {
         return new Promise((resolve) => {
             let buffer = '';
             let onData = (chunk) => {
-                buffer += chunk.toString('utf-8');
+                buffer += chunk.toString('utf-8').replace(/\r\n/g, '\n');
+                if (callback) callback(buffer);
                 if (buffer.slice(-6) === '(ocd) ') {
                     let output = buffer.slice(0, -6);
                     output = output.replace(/\n$/, '');
                     log(`ocd: ${JSON.stringify(output)}`);
                     resolve(output);
-                    this._ocdProc.stdout.removeListener('data', onData);
+                    this._debuggerProc.stdout.removeListener('data', onData);
                     return;
                 }
             };
-            this._ocdProc.stdout.on('data', onData);
+            this._debuggerProc.stdout.on('data', onData);
         });
     }
 
@@ -115,51 +115,29 @@ class OCamlDebugSession extends DebugSession {
     }
 
     protected initializeRequest(response: DebugProtocol.InitializeResponse, args: DebugProtocol.InitializeRequestArguments): void {
-        if (os.platform() === 'win32') {
-            // We use `mkfifo` to redirect stdout and stderr of program to client.
-            this.sendErrorResponse(response, 1, 'Currently OCaml debugger do not support windows os.');
-            return;
-        }
         response.body.supportsConfigurationDoneRequest = true;
         // response.body.supportsFunctionBreakpoints = true;
         this.sendResponse(response);
     }
 
     protected disconnectRequest(response: DebugProtocol.DisconnectResponse, args: DebugProtocol.DisconnectArguments): void {
-        if (this._ocdProc) {
-            this._ocdProc.kill();
+        if (this._debuggeeProc) {
+            this._debuggeeProc.stdout.removeAllListeners();
+            this._debuggeeProc.stderr.removeAllListeners();
+            this._debuggeeProc.kill();
+        }
+        
+        if (this._debuggerProc) {
+            this._debuggerProc.kill();
         }
 
-        if (this._progStdout) {
-            this._progStdout.removeAllListeners();
-            if (this._progStdout['destroy']) {
-                this._progStdout['destroy']();
-            }
-        }
-
-        if (this._progStderr) {
-            this._progStderr.removeAllListeners();
-            if (this._progStderr['destroy']) {
-                this._progStderr['destroy']();
-            }
-        }
-
-        if (this._progStdoutPipeName) {
-            child_process.exec(`rm ${this._progStdoutPipeName}`);
-        }
-        if (this._progStderrPipeName) {
-            child_process.exec(`rm ${this._progStderrPipeName}`);
-        }
-
-        this._ocdProc = null;
+        this._remoteMode = false;
+        this._socket = null;
+        this._debuggeeProc = null;
+        this._debuggerProc = null;
         this._breakpoints = null;
         this._filenames = [];
         this._filenameToPath.clear();
-
-        this._progStdoutPipeName = null;
-        this._progStderrPipeName = null;
-        this._progStdout = null;
-        this._progStderr = null;
 
         super.disconnectRequest(response, args);
     }
@@ -170,45 +148,41 @@ class OCamlDebugSession extends DebugSession {
             ocdArgs.push('cd', args.cd);
         }
 
-        ocdArgs.push(args.program);
+        this._remoteMode = !!args.socket;
+
+        if (this._remoteMode) {
+            this._socket = args.socket;
+        } else {
+            let port = await freeport();
+            this._socket = `127.0.0.1:${port}`;
+        }
+
+        ocdArgs.push('-s', this._socket);
+        // ocdArgs.push('-machine-readable');
+        ocdArgs.push(path.normalize(args.program));
+
         this._launchArgs = args;
-        this._progStdoutPipeName = path.resolve(os.tmpdir(), uuid());
-        this._progStderrPipeName = path.resolve(os.tmpdir(), uuid());
-
-        await new Promise((resolve, reject) => {
-            child_process.exec(`mkfifo ${this._progStdoutPipeName}`, (err, output) => {
-                if (err) return reject(err);
-                resolve();
-            });
-        });
-
-        await new Promise((resolve, reject) => {
-            child_process.exec(`mkfifo ${this._progStderrPipeName}`, (err, output) => {
-                if (err) return reject(err);
-                resolve();
-            });
-        });
-
-        this._progStdout = fs.createReadStream(this._progStdoutPipeName);
-        this._progStdout.on('data', (chunk) => {
-            this.sendEvent(new OutputEvent(chunk.toString('utf-8'), 'stdout'));
-        });
-
-        this._progStderr = fs.createReadStream(this._progStderrPipeName);
-        this._progStderr.on('data', (chunk) => {
-            this.sendEvent(new OutputEvent(chunk.toString('utf-8'), 'stderr'));
-        });
-
-        this._ocdProc = child_process.spawn('ocamldebug', ocdArgs);
+        console.log(ocdArgs);
+        this._debuggerProc = child_process.spawn('ocamldebug', ocdArgs);
         this._breakpoints = new Map();
 
-        this.ocdCommand([
-            'set', 'arguments', this._launchArgs.arguments || '', `> ${this._progStdoutPipeName}`, `2> ${this._progStderrPipeName}`
-        ], () => { });
-        this.ocdCommand(['goto', 0], () => { });
-
-        this.sendResponse(response);
-        this.sendEvent(new InitializedEvent());
+        this.ocdCommand(['set', 'loadingmode', 'manual'], () => { });
+        this.ocdCommand(['goto', 0], () => {
+            this.sendResponse(response);
+            this.sendEvent(new InitializedEvent());
+        }, (buffer: string) => {
+            if (!this._debuggeeProc && !this._remoteMode && buffer.includes('Waiting for connection...')) {
+                this._debuggeeProc = child_process.spawn(args.program, args.arguments || [], {
+                    env: {"CAML_DEBUG_SOCKET": this._socket}
+                });
+                this._debuggeeProc.stdout.on('data', (chunk) => {
+                    this.sendEvent(new OutputEvent(chunk.toString('utf-8'), 'stdout'));
+                });
+                this._debuggeeProc.stderr.on('data', (chunk) => {
+                    this.sendEvent(new OutputEvent(chunk.toString('utf-8'), 'stderr'));
+                });
+            }
+        });
     }
 
     protected configurationDoneRequest(response: DebugProtocol.ConfigurationDoneResponse, args: DebugProtocol.ConfigurationDoneArguments): void {
