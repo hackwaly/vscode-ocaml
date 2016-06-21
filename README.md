@@ -12,7 +12,7 @@ This is an VS Code extension that provides OCaml language support.
 * Show type information on hover. _powered by ocamlmerlin_
 * Peek and goto definition (also provide a symbol list). _powered by ocamlmerlin_
 * Auto indent on your type. _powered by ocp-indent_
-* Debugger (not support windows). _powered by ocamldebug_
+* Debugger integrated. _powered by ocamldebug_
 
 ![features](http://i.giphy.com/26BRsQmMAHdg1LNRe.gif)
 
@@ -44,6 +44,11 @@ In VS Code, `*.ml` is associated to F# by default, You need manually config this
 ```
 
 ## Release Notes
+
+### 0.4.0
+
+Add Windows debug support.
+Add remote debug support.
 
 ### 0.3.0
 
