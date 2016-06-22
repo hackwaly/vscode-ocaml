@@ -128,6 +128,7 @@ class OCamlDebugSession extends DebugSession {
         }
         
         if (this._debuggerProc) {
+            this._debuggerProc.stdin.end('quit\n');
             this._debuggerProc.kill();
         }
 
