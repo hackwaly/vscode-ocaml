@@ -138,12 +138,12 @@ export function activate(context: vscode.ExtensionContext) {
                 await session.syncBuffer(document.fileName, document.getText(), token);
                 if (token.isCancellationRequested) return null;
 
-                for (let kind of ['ml', 'mli']) {
-                    let [status, result] = await session.request(['locate', null, 'ml', 'at', fromVsPos(position)]);
+                let locate = async (kind: string): Promise<vscode.Location> => {
+                    let [status, result] = await session.request(['locate', null, kind, 'at', fromVsPos(position)]);
                     if (token.isCancellationRequested) return null;
 
                     if (status !== 'return' || typeof result === 'string') {
-                        continue;
+                        return null;
                     }
 
                     let uri = document.uri;
@@ -151,10 +151,22 @@ export function activate(context: vscode.ExtensionContext) {
                     if (file) {
                         uri = vscode.Uri.file(file);
                     }
+                    
                     return new vscode.Location(uri, toVsPos(pos));
+                };
+
+                let mlDef = await locate('ml');
+                let mliDef = await locate('mli');
+
+                let locs = [];
+
+                if (mlDef.uri.toString() === mliDef.uri.toString() && mlDef.range.isEqual(mliDef.range)) {
+                    locs = [mlDef];
+                } else {
+                    locs = [mliDef, mlDef];
                 }
 
-                return null;
+                return locs;
             }
         })
     );
