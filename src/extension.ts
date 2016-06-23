@@ -8,9 +8,15 @@ let getStream = require('get-stream');
 let ocamlLang = { language: 'ocaml' };
 let configuration = vscode.workspace.getConfiguration("ocaml");
 
-let doOcpIndent = async (code: string, token: vscode.CancellationToken) => {
+let doOcpIndent = async (code: string, token: vscode.CancellationToken, range?: vscode.Range) => {
     let ocpIndentPath = configuration.get<string>('ocpIndentPath');
-    let cp = child_process.spawn(ocpIndentPath, ['--numeric']);
+    let args = [];
+    if (range) {
+        args.push('--lines');
+        args.push(`${range.start.line+1}-${range.end.line+1}`);
+    }
+    args.push('--numeric');
+    let cp = child_process.spawn(ocpIndentPath, args);
 
     token.onCancellationRequested(() => {
         cp.disconnect();
@@ -27,7 +33,9 @@ let doOcpIndent = async (code: string, token: vscode.CancellationToken) => {
     let oldIndents = code.split(/\n/g).map((line) => /^\s*/.exec(line)[0]);
 
     let edits = [];
-    newIndents.forEach((indent, line) => {
+    let beginLine = range ? range.start.line : 0;
+    newIndents.forEach((indent, index) => {
+        let line = beginLine + index;
         let oldIndent = oldIndents[line];
         let newIndent = ' '.repeat(indent);
         if (oldIndent !== newIndent) {
@@ -65,6 +73,14 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.languages.registerDocumentFormattingEditProvider(ocamlLang, {
             provideDocumentFormattingEdits(document, options, token) {
                 return doOcpIndent(document.getText(), token);
+            }
+        })
+    );
+
+    context.subscriptions.push(
+        vscode.languages.registerDocumentRangeFormattingEditProvider(ocamlLang, {
+            provideDocumentRangeFormattingEdits(document, range, options, token) {
+                return doOcpIndent(document.getText(), token, range);
             }
         })
     );
