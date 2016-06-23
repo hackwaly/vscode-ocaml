@@ -176,10 +176,15 @@ export function activate(context: vscode.ExtensionContext) {
 
                 let locs = [];
 
-                if (mlDef.uri.toString() === mliDef.uri.toString() && mlDef.range.isEqual(mliDef.range)) {
-                    locs = [mlDef];
+                if (mlDef && mliDef) {
+                    if (mlDef.uri.toString() === mliDef.uri.toString() && mlDef.range.isEqual(mliDef.range)) {
+                        locs = [mlDef];
+                    } else {
+                        locs = [mliDef, mlDef];
+                    }
                 } else {
-                    locs = [mliDef, mlDef];
+                    if (mliDef) locs.push(mliDef);
+                    if (mlDef) locs.push(mlDef);
                 }
 
                 return locs;
