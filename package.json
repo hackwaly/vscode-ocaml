@@ -29,7 +29,8 @@
         ],
         "extensions": [
           ".ml",
-          ".mli"
+          ".mli",
+          ".ocamlinit"
         ],
         "configuration": "./ocaml.configuration.json"
       },
