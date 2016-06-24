@@ -10,6 +10,9 @@
 			"stopOnEntry": false,
 			"args": [ "--server=4711" ],
 			"sourceMaps": true,
+            "env": {
+                "DEBUG_VSCODE_OCAML": "development"
+            },
 			"outDir": "${workspaceRoot}/../../out/src/debug"
 		}
 	]

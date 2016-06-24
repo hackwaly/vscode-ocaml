@@ -61,17 +61,21 @@ class OCamlDebugSession extends DebugSession {
     readUntilPrompt(callback?) {
         return new Promise((resolve) => {
             let buffer = '';
-            let onData = (chunk) => {
-                buffer += chunk.toString('utf-8').replace(/\r\n/g, '\n');
-                if (callback) callback(buffer);
+            let timer;
+            let onTimeout = () => {
                 if (buffer.slice(-6) === '(ocd) ') {
                     let output = buffer.slice(0, -6);
                     output = output.replace(/\n$/, '');
                     log(`ocd: ${JSON.stringify(output)}`);
                     resolve(output);
                     this._debuggerProc.stdout.removeListener('data', onData);
-                    return;
                 }
+            };
+            let onData = (chunk) => {
+                buffer += chunk.toString('utf-8').replace(/\r\n/g, '\n');
+                if (callback) callback(buffer);
+                clearTimeout(timer);
+                setTimeout(onTimeout, 64);
             };
             this._debuggerProc.stdout.on('data', onData);
         });
@@ -163,7 +167,6 @@ class OCamlDebugSession extends DebugSession {
         ocdArgs.push(path.normalize(args.program));
 
         this._launchArgs = args;
-        console.log(ocdArgs);
         this._debuggerProc = child_process.spawn('ocamldebug', ocdArgs);
         this._breakpoints = new Map();
 
