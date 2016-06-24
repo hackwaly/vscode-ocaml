@@ -7,8 +7,7 @@ import {
     StoppedEvent,
     TerminatedEvent,
     BreakpointEvent,
-    OutputEvent,
-    Handles
+    OutputEvent
 } from 'vscode-debugadapter';
 import {DebugProtocol} from 'vscode-debugprotocol';
 import * as path from 'path';
@@ -24,10 +23,6 @@ interface LaunchRequestArguments {
     arguments?: string[];
     stopOnEntry: boolean;
     socket?: string;
-}
-
-class SourceSource {
-    constructor(public module: string, public content?: string) { }
 }
 
 class OCamlDebugSession extends DebugSession {
@@ -75,7 +70,7 @@ class OCamlDebugSession extends DebugSession {
                 buffer += chunk.toString('utf-8').replace(/\r\n/g, '\n');
                 if (callback) callback(buffer);
                 clearTimeout(timer);
-                setTimeout(onTimeout, 64);
+                timer = setTimeout(onTimeout, 64);
             };
             this._debuggerProc.stdout.on('data', onData);
         });
