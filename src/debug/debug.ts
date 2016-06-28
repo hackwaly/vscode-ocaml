@@ -34,6 +34,7 @@ class OCamlDebugSession extends DebugSession {
     private _remoteMode: boolean = false;
     private _socket: string;
     private _breakpoints: Map<string, Breakpoint[]>;
+    private _functionBreakpoints: Breakpoint[];
     private _filenames = [];
     private _filenameToPath = new Map<string, string>();
 
@@ -110,7 +111,7 @@ class OCamlDebugSession extends DebugSession {
 
     protected initializeRequest(response: DebugProtocol.InitializeResponse, args: DebugProtocol.InitializeRequestArguments): void {
         response.body.supportsConfigurationDoneRequest = true;
-        // response.body.supportsFunctionBreakpoints = true;
+        response.body.supportsFunctionBreakpoints = true;
         this.sendResponse(response);
     }
 
@@ -131,6 +132,7 @@ class OCamlDebugSession extends DebugSession {
         this._debuggeeProc = null;
         this._debuggerProc = null;
         this._breakpoints = null;
+        this._functionBreakpoints = null;
         this._filenames = [];
         this._filenameToPath.clear();
 
@@ -159,6 +161,7 @@ class OCamlDebugSession extends DebugSession {
         this._launchArgs = args;
         this._debuggerProc = child_process.spawn('ocamldebug', ocdArgs);
         this._breakpoints = new Map();
+        this._functionBreakpoints = [];
 
         this._wait = this.readUntilPrompt().then(() => { });
         this.ocdCommand(['set', 'loadingmode', 'manual'], () => { });
@@ -190,6 +193,49 @@ class OCamlDebugSession extends DebugSession {
         this.sendResponse(response);
     }
 
+    private doSetBreakpoint(param: string, source?: DebugProtocol.Source) {
+        return new Promise((resolve) => {
+            this.ocdCommand(['break', param], (output) => {
+                let match = /^Breakpoint (\d+) at \d+: file ([^,]+), line (\d+), characters (\d+)-(\d+)$/m.exec(output);
+                let breakpoint = null;
+                if (match) {
+                    let filename = match[2];
+                    // Ugly hack.
+                    if (source && !this._filenameToPath.has(filename) && source.path && source.path.endsWith(filename)) {
+                        this._filenameToPath.set(filename, source.path);
+                    }
+                    breakpoint = new Breakpoint(
+                        true,
+                        +match[3],
+                        +match[4],
+                        this.getSource(filename)
+                    );
+                    breakpoint[OCamlDebugSession.BREAKPOINT_ID] = +match[1];
+                } else {
+                    breakpoint = new Breakpoint(false);
+                }
+                resolve(breakpoint);
+            });
+        });
+    }
+
+    private doDeleteBreakpoint(id: number) {
+        return new Promise((resolve, reject) => {
+            this.ocdCommand(['delete', id], () => {
+                resolve();
+            });
+        });
+    }
+
+    private async clearBreakpoints(breakpoints: Breakpoint[]) {
+        for (let breakpoint of breakpoints) {
+            if (breakpoint.verified) {
+                let breakpointId = breakpoint[OCamlDebugSession.BREAKPOINT_ID];
+                await this.doDeleteBreakpoint(breakpointId);
+            }
+        }
+    }
+
     protected async setBreakPointsRequest(response: DebugProtocol.SetBreakpointsResponse, args: DebugProtocol.SetBreakpointsArguments) {
         let breakpoints = [];
         let module;
@@ -200,50 +246,32 @@ class OCamlDebugSession extends DebugSession {
             module = this.getModuleFromFilename(args.source.path);
         }
 
-        let doSetBreakpoint = async (line, column) => {
-            return new Promise((resolve) => {
-                this.ocdCommand(['break', '@', module, line, column], (output) => {
-                    let match = /^Breakpoint (\d+) at \d+: file ([^,]+), line (\d+), characters (\d+)-(\d+)$/m.exec(output);
-                    let breakpoint = null;
-                    if (match) {
-                        let filename = match[2];
-                        if (!this._filenameToPath.has(filename) && args.source.path && args.source.path.endsWith(filename)) {
-                            this._filenameToPath.set(filename, args.source.path);
-                        }
-                        breakpoint = new Breakpoint(
-                            true,
-                            +match[3],
-                            +match[4],
-                            this.getSource(filename)
-                        );
-                        breakpoint[OCamlDebugSession.BREAKPOINT_ID] = +match[1];
-                    } else {
-                        breakpoint = new Breakpoint(false);
-                    }
-                    resolve(breakpoint);
-                });
-            });
-        };
-
-        let doDeleteBreakpoint = async (id) => {
-            return new Promise((resolve, reject) => {
-                this.ocdCommand(['delete', id], () => {
-                    resolve();
-                });
-            });
-        };
-
         let prevBreakpoints = this._breakpoints.get(module) || [];
-        for (let bp of prevBreakpoints) {
-            await doDeleteBreakpoint(bp[OCamlDebugSession.BREAKPOINT_ID]);
-        }
+        await this.clearBreakpoints(prevBreakpoints);
 
         for (let {line, column} of args.breakpoints) {
-            let breakpoint = await doSetBreakpoint(line, column);
+            let breakpoint = await this.doSetBreakpoint('@' + [module, line, column].join(' '), args.source);
             breakpoints.push(breakpoint);
         }
 
         this._breakpoints.set(module, breakpoints);
+
+        response.body = { breakpoints };
+        this.sendResponse(response);
+    }
+
+    protected async setFunctionBreakPointsRequest(response: DebugProtocol.SetFunctionBreakpointsResponse, args: DebugProtocol.SetFunctionBreakpointsArguments) {
+        let breakpoints = [];
+        
+        let prevBreakpoints = this._functionBreakpoints;
+        await this.clearBreakpoints(prevBreakpoints);
+
+        for (let {name} of args.breakpoints) {
+            let breakpoint = await this.doSetBreakpoint(name);
+            breakpoints.push(breakpoint);
+        }
+
+        this._functionBreakpoints = breakpoints;
 
         response.body = { breakpoints };
         this.sendResponse(response);
