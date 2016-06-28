@@ -140,7 +140,7 @@ class OCamlDebugSession extends DebugSession {
     protected async launchRequest(response: DebugProtocol.LaunchResponse, args: LaunchRequestArguments) {
         let ocdArgs = [];
         if (args.cd) {
-            ocdArgs.push('cd', args.cd);
+            ocdArgs.push('-cd', args.cd);
         }
 
         this._remoteMode = !!args.socket;
