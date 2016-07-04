@@ -25,6 +25,6 @@ array = '[|' list:value_list? '|]' { return {kind: 'array', items: fixList(list)
 list = '[' list:value_list? ']' { return {kind: 'list', items: fixList(list)}; }
 value_list = head:value tail:(';' _ value)* { return fixList1(head, tail); }
 string = value:$('"' ([^\\"] / '\\' .)* '"') { return {kind: 'plain', value: value}; }
-char = value:$('\'' ([^\\'] / '\\' [^']+) '\'') { return {kind: 'plain', value: value}; }
+char = value:$('\'' ([^\\'] / '\\\'' / '\\' [^']+) '\'') { return {kind: 'plain', value: value}; }
 plain = value:$([^"{}[\](),;]+) { return {kind: 'plain', value:value}; }
 _ = $([ \t]+) {}
