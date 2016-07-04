@@ -70,7 +70,7 @@ module.exports = (function() {
         peg$c31 = { type: "literal", value: "[|", description: "\"[|\"" },
         peg$c32 = "|]",
         peg$c33 = { type: "literal", value: "|]", description: "\"|]\"" },
-        peg$c34 = function() { return {kind: 'array', items: fixList(list)}; },
+        peg$c34 = function(list) { return {kind: 'array', items: fixList(list)}; },
         peg$c35 = "[",
         peg$c36 = { type: "literal", value: "[", description: "\"[\"" },
         peg$c37 = "]",
@@ -824,7 +824,7 @@ module.exports = (function() {
           }
           if (s3 !== peg$FAILED) {
             peg$savedPos = s0;
-            s1 = peg$c34();
+            s1 = peg$c34(s2);
             s0 = s1;
           } else {
             peg$currPos = s0;

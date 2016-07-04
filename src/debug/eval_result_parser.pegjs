@@ -21,7 +21,7 @@ con = con:id _ args:value { return {kind: 'con', con:con, args: args}; }
 record = '{' list:field_list? '}' { return {kind: 'record', items: fixList(list)} }
 field = name:id _ '=' _ value:value { return {name: name, value: value}; }
 field_list = head:field tail:(';' _ field)* { return fixList1(head, tail); }
-array = '[|' value_list? '|]' { return {kind: 'array', items: fixList(list)}; }
+array = '[|' list:value_list? '|]' { return {kind: 'array', items: fixList(list)}; }
 list = '[' list:value_list? ']' { return {kind: 'list', items: fixList(list)}; }
 value_list = head:value tail:(';' _ value)* { return fixList1(head, tail); }
 string = value:$('"' ([^\\"] / '\\' .)* '"') { return {kind: 'plain', value: value}; }
