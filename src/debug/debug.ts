@@ -112,6 +112,7 @@ class OCamlDebugSession extends DebugSession {
     protected initializeRequest(response: DebugProtocol.InitializeResponse, args: DebugProtocol.InitializeRequestArguments): void {
         response.body.supportsConfigurationDoneRequest = true;
         response.body.supportsFunctionBreakpoints = true;
+        response.body.supportsEvaluateForHovers = true;
         this.sendResponse(response);
     }
 
