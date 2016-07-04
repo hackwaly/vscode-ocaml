@@ -5,9 +5,11 @@
         "outDir": "out",
         "noLib": true,
         "sourceMap": true,
+        "allowJs": true,
         "rootDir": "."
     },
     "exclude": [
-        "node_modules"
+        "node_modules",
+        "out"
     ]
 }

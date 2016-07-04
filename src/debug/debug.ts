@@ -2,7 +2,7 @@
 
 import * as child_process from 'child_process';
 import {
-    DebugSession, Thread, Breakpoint, Source, StackFrame,
+    DebugSession, Thread, Breakpoint, Source, StackFrame, Variable, Handles,
     InitializedEvent,
     StoppedEvent,
     TerminatedEvent,
@@ -13,6 +13,7 @@ import {DebugProtocol} from 'vscode-debugprotocol';
 import * as path from 'path';
 import * as fs from 'fs';
 import {log} from '../utils';
+let evalResultParser = require('./eval_result_parser.js');
 
 let promisify = require('tiny-promisify');
 let freeport = promisify(require('freeport'));
@@ -25,6 +26,28 @@ interface LaunchRequestArguments {
     socket?: string;
 }
 
+export interface VariableContainer {
+    expand(session: OCamlDebugSession): Promise<Variable[]>;
+    setValue(session: OCamlDebugSession, name: string, value: string): Promise<string>;
+}
+
+export class Expander implements VariableContainer {
+
+    private _expanderFunction: () => Promise<Variable[]>;
+
+    constructor(func: () => Promise<Variable[]>) {
+        this._expanderFunction = func;
+    }
+
+    async expand(session: OCamlDebugSession): Promise<Variable[]> {
+        return this._expanderFunction();
+    }
+
+    async setValue(session: OCamlDebugSession, name: string, value: string): Promise<string> {
+        throw new Error("Setting value not supported");
+    }
+}
+
 class OCamlDebugSession extends DebugSession {
     private static BREAKPOINT_ID = Symbol();
     private _launchArgs: LaunchRequestArguments;
@@ -35,6 +58,7 @@ class OCamlDebugSession extends DebugSession {
     private _socket: string;
     private _breakpoints: Map<string, Breakpoint[]>;
     private _functionBreakpoints: Breakpoint[];
+    private _variableHandles: Handles<VariableContainer>;
     private _filenames = [];
     private _filenameToPath = new Map<string, string>();
 
@@ -75,7 +99,7 @@ class OCamlDebugSession extends DebugSession {
     parseEvent(output) {
         if (output.indexOf('Program exit.') >= 0) {
             this.sendEvent(new TerminatedEvent());
-        } else if (output.indexOf('Program end.') >= 0) { 
+        } else if (output.indexOf('Program end.') >= 0) {
             let index = output.indexOf('Program end.');
             let reason = output.substring(index + 'Program end.'.length);
             this.sendEvent(new OutputEvent(reason));
@@ -100,7 +124,7 @@ class OCamlDebugSession extends DebugSession {
             this._filenames.push(filename);
         }
 
-        let sourcePath = null;        
+        let sourcePath = null;
         let testPath = path.resolve(path.dirname(this._launchArgs.program), filename);
         // TODO: check against list command.
         if (fs.existsSync(testPath)) {
@@ -122,7 +146,7 @@ class OCamlDebugSession extends DebugSession {
             this._debuggeeProc.stderr.removeAllListeners();
             this._debuggeeProc.kill();
         }
-        
+
         if (this._debuggerProc) {
             this._debuggerProc.stdin.end('quit\n');
             this._debuggerProc.kill();
@@ -134,6 +158,7 @@ class OCamlDebugSession extends DebugSession {
         this._debuggerProc = null;
         this._breakpoints = null;
         this._functionBreakpoints = null;
+        this._variableHandles.reset();
         this._filenames = [];
         this._filenameToPath.clear();
 
@@ -163,6 +188,7 @@ class OCamlDebugSession extends DebugSession {
         this._debuggerProc = child_process.spawn('ocamldebug', ocdArgs);
         this._breakpoints = new Map();
         this._functionBreakpoints = [];
+        this._variableHandles = new Handles<VariableContainer>();
 
         this._wait = this.readUntilPrompt().then(() => { });
         this.ocdCommand(['set', 'loadingmode', 'manual'], () => { });
@@ -172,7 +198,7 @@ class OCamlDebugSession extends DebugSession {
         }, (buffer: string) => {
             if (!this._debuggeeProc && !this._remoteMode && buffer.includes('Waiting for connection...')) {
                 this._debuggeeProc = child_process.spawn(args.program, args.arguments || [], {
-                    env: {"CAML_DEBUG_SOCKET": this._socket}
+                    env: { "CAML_DEBUG_SOCKET": this._socket }
                 });
                 this._debuggeeProc.stdout.on('data', (chunk) => {
                     this.sendEvent(new OutputEvent(chunk.toString('utf-8'), 'stdout'));
@@ -251,7 +277,7 @@ class OCamlDebugSession extends DebugSession {
         await this.clearBreakpoints(prevBreakpoints);
 
         for (let {line, column} of args.breakpoints) {
-            let breakpoint = await this.doSetBreakpoint('@' + [module, line, column].join(' '), args.source);
+            let breakpoint = await this.doSetBreakpoint('@ ' + [module, line, column].join(' '), args.source);
             breakpoints.push(breakpoint);
         }
 
@@ -263,7 +289,7 @@ class OCamlDebugSession extends DebugSession {
 
     protected async setFunctionBreakPointsRequest(response: DebugProtocol.SetFunctionBreakpointsResponse, args: DebugProtocol.SetFunctionBreakpointsArguments) {
         let breakpoints = [];
-        
+
         let prevBreakpoints = this._functionBreakpoints;
         await this.clearBreakpoints(prevBreakpoints);
 
@@ -325,11 +351,91 @@ class OCamlDebugSession extends DebugSession {
         });
     }
 
+    private parseEvalResult(text: string): Variable {
+        let repr = (value: any) => {
+            switch (value.kind) {
+                case 'plain':
+                    return value.value;
+                case 'con':
+                    return `${value.con} ${repr(value.args)}`;
+                case 'tuple':
+                    return `(${value.items.map(repr).join(', ')})`;
+                case 'array':
+                    return `[|${value.items.map(repr).join('; ')}|]`;
+                case 'list':
+                    return `[${value.items.map(repr).join('; ')}]`;
+                case 'record':
+                    return `{${value.items.map(({name, value}) => `${name} = ${repr(value)}`).join('; ')}}`;
+            }
+        };
+
+        let expander = (value) => {
+            return async () => {
+                switch (value.kind) {
+                    case 'con':
+                        return [createVariable('%arguments', value.args)];
+                    case 'tuple':
+                        return value.items.map((item, index) => createVariable(`%${index+1}`, item));
+                    case 'array':
+                    case 'list':
+                        return value.items.map((item, index) => createVariable(`${index}`, item));
+                    case 'record':
+                        return value.items.map(({name, value}) => createVariable(name, value));
+                }
+            };
+        };
+
+        let createVariable = (name: string, value: any): Variable => {
+            switch (value.kind) {
+                case 'plain':
+                    return new Variable(name, repr(value));
+                default:
+                    return new Variable(name, repr(value),
+                        this._variableHandles.create(new Expander(expander(value))));
+            }
+        };
+
+        try {
+            let data = evalResultParser.parse(text);
+            return createVariable(data.name, data.value);
+        } catch (ex) {
+            return null;
+        }
+    }
+
+	protected variablesRequest(response: DebugProtocol.VariablesResponse, args: DebugProtocol.VariablesArguments): void {
+		const reference = args.variablesReference;
+		const variablesContainer = this._variableHandles.get(reference);
+		if (variablesContainer) {
+			variablesContainer.expand(this).then(variables => {
+				response.body = {
+					variables: variables
+				};
+				this.sendResponse(response);
+			}).catch(err => {
+				response.body = {
+					variables: []
+				};
+				this.sendResponse(response);
+			});
+		} else {
+			response.body = {
+				variables: []
+			};
+			this.sendResponse(response);
+		}
+	}
+
     protected evaluateRequest(response: DebugProtocol.EvaluateResponse, args: DebugProtocol.EvaluateArguments) {
         this.ocdCommand(['frame', args.frameId], () => {
             this.ocdCommand(['print', `(${args.expression})`], (result) => {
-                response.body = { result, variablesReference: 0 };
-                this.sendResponse(response);
+                let variable = this.parseEvalResult(result);
+                if (variable) {
+                    response.body = { result: variable.value, variablesReference: variable.variablesReference };
+                    this.sendResponse(response);
+                } else {
+                    this.sendResponse(response);
+                }
             });
         });
     }
@@ -347,7 +453,7 @@ class OCamlDebugSession extends DebugSession {
                 let content = lines.map((line) => {
                     // FIXME: make sure do not accidently replace "<|a|>" in a string or comment.
                     return line.replace(/^\d+ /, '').replace(/<\|[a-z]+\|>/, '$1');
-                }).join('\n');           
+                }).join('\n');
 
                 resolve(content);
             });
