@@ -231,7 +231,7 @@ class OCamlDebugSession extends DebugSession {
     protected async configurationDoneRequest(response: DebugProtocol.ConfigurationDoneResponse, args: DebugProtocol.ConfigurationDoneArguments) {
         if (this._launchArgs.script) {
             await new Promise((resolve) => {
-                this.ocdCommand(['script', `"${this._launchArgs.script}"`], resolve);
+                this.ocdCommand(['source', `"${this._launchArgs.script}"`], resolve);
             });
         }
         
