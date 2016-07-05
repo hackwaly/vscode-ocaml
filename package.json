@@ -3,7 +3,7 @@
   "name": "ocaml",
   "displayName": "OCaml",
   "description": "Rich OCaml language support for Visual Studio Code",
-  "version": "0.4.10",
+  "version": "0.4.11",
   "publisher": "hackwaly",
   "icon": "images/colour-icon.svg",
   "engines": {
@@ -134,6 +134,10 @@
               "symbols": {
                 "type": "string",
                 "description": "The path to OCaml debug symbols *.cds file."
+              },
+              "script": {
+                "type": "string",
+                "description": "The path to the debug script which you wish to run after debug session established."
               }
             }
           }

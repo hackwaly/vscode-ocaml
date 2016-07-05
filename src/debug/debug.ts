@@ -25,6 +25,7 @@ interface LaunchRequestArguments {
     stopOnEntry: boolean;
     socket?: string;
     symbols?: string;
+    script?: string;
 }
 
 export interface VariableContainer {
@@ -204,7 +205,8 @@ class OCamlDebugSession extends DebugSession {
                 this.sendEvent(new OutputEvent(`ocamldebug: ${message}`));
             } else {
                 this._debuggeeProc = child_process.spawn(args.program, args.arguments || [], {
-                    env: { "CAML_DEBUG_SOCKET": this._socket }
+                    env: { "CAML_DEBUG_SOCKET": this._socket },
+                    cwd: args.cd || path.dirname(args.program)
                 });
                 this._debuggeeProc.stdout.on('data', (chunk) => {
                     this.sendEvent(new OutputEvent(chunk.toString('utf-8'), 'stdout'));
@@ -226,7 +228,13 @@ class OCamlDebugSession extends DebugSession {
         });
     }
 
-    protected configurationDoneRequest(response: DebugProtocol.ConfigurationDoneResponse, args: DebugProtocol.ConfigurationDoneArguments): void {
+    protected async configurationDoneRequest(response: DebugProtocol.ConfigurationDoneResponse, args: DebugProtocol.ConfigurationDoneArguments) {
+        if (this._launchArgs.script) {
+            await new Promise((resolve) => {
+                this.ocdCommand(['script', `"${this._launchArgs.script}"`], resolve);
+            });
+        }
+        
         if (this._launchArgs.stopOnEntry) {
             this.ocdCommand(['goto', 0], this.parseEvent.bind(this));
         } else {
