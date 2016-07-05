@@ -129,7 +129,11 @@
               },
               "socket": {
                 "type": "string",
-                "description": "A socket name or address for remote debug."
+                "description": "The socket name or address for remote debug."
+              },
+              "symbols": {
+                "type": "string",
+                "description": "The path to OCaml debug symbols *.cds file."
               }
             }
           }

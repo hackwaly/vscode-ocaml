@@ -24,6 +24,7 @@ interface LaunchRequestArguments {
     arguments?: string[];
     stopOnEntry: boolean;
     socket?: string;
+    symbols?: string;
 }
 
 export interface VariableContainer {
@@ -182,7 +183,8 @@ class OCamlDebugSession extends DebugSession {
 
         ocdArgs.push('-s', this._socket);
         // ocdArgs.push('-machine-readable');
-        ocdArgs.push(path.normalize(args.program));
+        
+        ocdArgs.push(path.normalize(args.symbols || args.program));
 
         this._launchArgs = args;
         this._debuggerProc = child_process.spawn('ocamldebug', ocdArgs);
@@ -192,11 +194,15 @@ class OCamlDebugSession extends DebugSession {
 
         this._wait = this.readUntilPrompt().then(() => { });
         this.ocdCommand(['set', 'loadingmode', 'manual'], () => { });
-        this.ocdCommand(['goto', 0], () => {
-            this.sendResponse(response);
-            this.sendEvent(new InitializedEvent());
-        }, (buffer: string) => {
-            if (!this._debuggeeProc && !this._remoteMode && buffer.includes('Waiting for connection...')) {
+
+        let once = false;        
+        let onceSocketListened = (message: string) => {
+            if (once) return;
+            once = true;
+
+            if (this._remoteMode) {
+                this.sendEvent(new OutputEvent(`ocamldebug: ${message}`));
+            } else {
                 this._debuggeeProc = child_process.spawn(args.program, args.arguments || [], {
                     env: { "CAML_DEBUG_SOCKET": this._socket }
                 });
@@ -206,6 +212,16 @@ class OCamlDebugSession extends DebugSession {
                 this._debuggeeProc.stderr.on('data', (chunk) => {
                     this.sendEvent(new OutputEvent(chunk.toString('utf-8'), 'stderr'));
                 });
+            }
+        };     
+
+        this.ocdCommand(['goto', 0], () => {
+            this.sendResponse(response);
+            this.sendEvent(new InitializedEvent());
+        }, (buffer: string) => {
+            if (buffer.includes('Waiting for connection...')) {
+                let message = /Waiting for connection\.\.\..*$/m.exec(buffer)[0];
+                onceSocketListened(message);
             }
         });
     }
