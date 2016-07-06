@@ -210,7 +210,7 @@ class OCamlDebugSession extends DebugSession {
             once = true;
 
             if (this._remoteMode) {
-                this.sendEvent(new OutputEvent(`ocamldebug: ${message}`));
+                this.sendEvent(new OutputEvent(message));
             } else {
                 this._debuggeeProc = child_process.spawn(args.program, args.arguments || [], {
                     env: { "CAML_DEBUG_SOCKET": this._socket },
@@ -238,9 +238,12 @@ class OCamlDebugSession extends DebugSession {
 
     protected async configurationDoneRequest(response: DebugProtocol.ConfigurationDoneResponse, args: DebugProtocol.ConfigurationDoneArguments) {
         if (this._launchArgs.script) {
-            await new Promise((resolve) => {
+            let output = await new Promise((resolve) => {
                 this.ocdCommand(['source', `"${this._launchArgs.script}"`], resolve);
             });
+            if (output) {
+                this.sendEvent(new OutputEvent(output as string));
+            }
         }
         
         if (this._launchArgs.stopOnEntry) {
