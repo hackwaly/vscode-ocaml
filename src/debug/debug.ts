@@ -26,6 +26,7 @@ interface LaunchRequestArguments {
     socket?: string;
     symbols?: string;
     script?: string;
+    _showLogs?: boolean;
 }
 
 export interface VariableContainer {
@@ -68,13 +69,20 @@ class OCamlDebugSession extends DebugSession {
         super();
     }
 
+    log(msg: string) {
+        log(msg);
+        if (this._launchArgs._showLogs) {
+            this.sendEvent(new OutputEvent(msg));
+        }
+    }
+
     ocdCommand(cmd, callback, callback2?) {
         if (Array.isArray(cmd)) {
             cmd = cmd.join(' ');
         }
 
         this._wait = this._wait.then(() => {
-            log(`cmd: ${cmd}`);
+            this.log(`cmd: ${cmd}`);
             this._debuggerProc.stdin.write(cmd + '\n');
             return this.readUntilPrompt(callback2).then((output) => { callback(output) });
         });
@@ -89,7 +97,7 @@ class OCamlDebugSession extends DebugSession {
                 if (buffer.slice(-6) === '(ocd) ') {
                     let output = buffer.slice(0, -6);
                     output = output.replace(/\n$/, '');
-                    log(`ocd: ${JSON.stringify(output)}`);
+                    this.log(`ocd: ${JSON.stringify(output)}`);
                     resolve(output);
                     this._debuggerProc.stdout.removeListener('data', onData);
                 }
@@ -353,22 +361,29 @@ class OCamlDebugSession extends DebugSession {
     }
 
     protected stackTraceRequest(response: DebugProtocol.StackTraceResponse, args: DebugProtocol.StackTraceArguments) {
-        this.ocdCommand(['backtrace', 100], (text) => {
+        this.ocdCommand(['backtrace', 100], (text: string) => {
             let stackFrames = [];
 
             let lines = text.trim().split(/\n/g);
             if (lines[0] === 'Backtrace:') {
-                stackFrames = lines.slice(1).map((line) => {
-                    let match = /^#(\d+) ([^ ]+) ([^:]+):([^:]+):([^:]+)$/.exec(line);
-                    return new StackFrame(
+                lines = lines.slice(1);
+            }
+            if (lines[lines.length - 1].includes('(Encountered a function with no debugging information)')) {
+                lines.pop();
+            }
+
+            lines.forEach((line) => {
+                let match = /^#(\d+) ([^ ]+) ([^:]+):([^:]+):([^:]+)$/.exec(line);
+                if (match) {
+                    stackFrames.push(new StackFrame(
                         +match[1],
                         '',
                         this.getSource(match[3]),
                         +match[4],
                         +match[5]
-                    );
-                });
-            }
+                    ));
+                }
+            });
 
             response.body = { stackFrames };
             this.sendResponse(response);

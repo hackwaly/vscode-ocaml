@@ -138,6 +138,11 @@
               "script": {
                 "type": "string",
                 "description": "The path to the debug script which you wish to run after debug session established."
+              },
+              "_showLogs": {
+                "type": "boolean",
+                "description": "Show logs which debugAdapter produced in debug window. Useful for debug debugAdapter.",
+                "default": false
               }
             }
           }
