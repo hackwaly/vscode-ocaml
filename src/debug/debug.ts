@@ -72,7 +72,7 @@ class OCamlDebugSession extends DebugSession {
     log(msg: string) {
         log(msg);
         if (this._launchArgs._showLogs) {
-            this.sendEvent(new OutputEvent(msg));
+            this.sendEvent(new OutputEvent(`${msg}\n`));
         }
     }
 
@@ -192,7 +192,7 @@ class OCamlDebugSession extends DebugSession {
 
         ocdArgs.push('-s', this._socket);
         // ocdArgs.push('-machine-readable');
-        
+
         ocdArgs.push(path.normalize(args.symbols || args.program));
 
         this._launchArgs = args;
@@ -204,7 +204,7 @@ class OCamlDebugSession extends DebugSession {
         this._wait = this.readUntilPrompt().then(() => { });
         this.ocdCommand(['set', 'loadingmode', 'manual'], () => { });
 
-        let once = false;        
+        let once = false;
         let onceSocketListened = (message: string) => {
             if (once) return;
             once = true;
@@ -223,7 +223,7 @@ class OCamlDebugSession extends DebugSession {
                     this.sendEvent(new OutputEvent(chunk.toString('utf-8'), 'stderr'));
                 });
             }
-        };     
+        };
 
         this.ocdCommand(['goto', 0], () => {
             this.sendResponse(response);
@@ -245,7 +245,7 @@ class OCamlDebugSession extends DebugSession {
                 this.sendEvent(new OutputEvent(output as string));
             }
         }
-        
+
         if (this._launchArgs.stopOnEntry) {
             this.ocdCommand(['goto', 0], this.parseEvent.bind(this));
         } else {
@@ -441,6 +441,7 @@ class OCamlDebugSession extends DebugSession {
             let data = evalResultParser.parse(text);
             return createVariable(data.name, data.value);
         } catch (ex) {
+            this.log(`Error (${ex}) occurs while parsing eval result.`);
             return null;
         }
     }
