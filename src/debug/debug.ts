@@ -105,7 +105,7 @@ class OCamlDebugSession extends DebugSession {
                     output = output.replace(/\n$/, '');
                     this.log(`ocd: ${JSON.stringify(output)}`);
                     resolve(output);
-                    this._debuggerProc.stdout.removeListener('data', onData);
+                    this._debuggerProc[DECODED_STDOUT].removeListener('data', onData);
                 }
             };
             this._debuggerProc[DECODED_STDOUT].on('data', onData);
