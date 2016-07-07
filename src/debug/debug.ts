@@ -17,6 +17,10 @@ let evalResultParser = require('./eval_result_parser.js');
 
 let promisify = require('tiny-promisify');
 let freeport = promisify(require('freeport'));
+let iconv = require('iconv-lite');
+
+let DECODED_STDOUT = Symbol();
+let DECODED_STDERR = Symbol();
 
 interface LaunchRequestArguments {
     cd: string;
@@ -104,7 +108,7 @@ class OCamlDebugSession extends DebugSession {
                     this._debuggerProc.stdout.removeListener('data', onData);
                 }
             };
-            this._debuggerProc.stdout.on('data', onData);
+            this._debuggerProc[DECODED_STDOUT].on('data', onData);
         });
     }
 
@@ -198,8 +202,11 @@ class OCamlDebugSession extends DebugSession {
         ocdArgs.push(path.normalize(args.symbols || args.program));
 
         this._launchArgs = args;
+        
         this._debuggerProc = child_process.spawn('ocamldebug', ocdArgs);
-        this._debuggerProc.stdout.setEncoding(args.ocamldebugEncoding || 'utf-8');
+        this._debuggerProc[DECODED_STDOUT] = iconv.decodeStream(args.ocamldebugEncoding || 'utf-8');
+        this._debuggerProc.stdout.pipe(this._debuggerProc[DECODED_STDOUT]);
+        
         this._breakpoints = new Map();
         this._functionBreakpoints = [];
         this._variableHandles = new Handles<VariableContainer>();
@@ -219,12 +226,16 @@ class OCamlDebugSession extends DebugSession {
                     env: { "CAML_DEBUG_SOCKET": this._socket },
                     cwd: args.cd || path.dirname(args.program)
                 });
-                this._debuggeeProc.stdout.setEncoding(this._launchArgs.encoding || 'utf-8');
-                this._debuggeeProc.stderr.setEncoding(this._launchArgs.encoding || 'utf-8');
-                this._debuggeeProc.stdout.on('data', (chunk) => {
+
+                this._debuggeeProc[DECODED_STDOUT] = iconv.decodeStream(args.encoding || 'utf-8');
+                this._debuggeeProc.stdout.pipe(this._debuggeeProc[DECODED_STDOUT]);
+                this._debuggeeProc[DECODED_STDOUT].on('data', (chunk) => {
                     this.sendEvent(new OutputEvent(chunk, 'stdout'));
                 });
-                this._debuggeeProc.stderr.on('data', (chunk) => {
+
+                this._debuggeeProc[DECODED_STDERR] = iconv.decodeStream(args.encoding || 'utf-8');
+                this._debuggeeProc.stderr.pipe(this._debuggeeProc[DECODED_STDERR]);
+                this._debuggeeProc[DECODED_STDERR].on('data', (chunk) => {
                     this.sendEvent(new OutputEvent(chunk, 'stderr'));
                 });
             }
