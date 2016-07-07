@@ -441,7 +441,10 @@ class OCamlDebugSession extends DebugSession {
             let data = evalResultParser.parse(text);
             return createVariable(data.name, data.value);
         } catch (ex) {
-            this.log(`Error (${ex}) occurs while parsing eval result.`);
+            let start = ex.location.start.offset;
+            let end = Math.max(ex.location.end.offset, Math.min(start + 16, text.length));
+            let peek = text.substring(start, end);
+            this.log(`Error (${ex}) occurs while parsing at "${peek}...".`);
             return null;
         }
     }
