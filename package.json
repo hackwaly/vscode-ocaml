@@ -139,6 +139,16 @@
                 "type": "string",
                 "description": "The path to the debug script which you wish to run after debug session established."
               },
+              "encoding": {
+                "type": "string",
+                "description": "The encoding which program's stdout/stderr used.",
+                "default": "utf-8"
+              },
+              "ocamldebugEncoding": {
+                "type": "string",
+                "description": "The encoding which ocamldebug's stdout/stderr used.",
+                "default": "utf-8"
+              },
               "_showLogs": {
                 "type": "boolean",
                 "description": "Show logs which debugAdapter produced in debug window. Useful for debug debugAdapter.",

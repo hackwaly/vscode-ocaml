@@ -26,6 +26,8 @@ interface LaunchRequestArguments {
     socket?: string;
     symbols?: string;
     script?: string;
+    encoding?: string;
+    ocamldebugEncoding?: string;
     _showLogs?: boolean;
 }
 
@@ -92,7 +94,7 @@ class OCamlDebugSession extends DebugSession {
         return new Promise((resolve) => {
             let buffer = '';
             let onData = (chunk) => {
-                buffer += chunk.toString('utf-8').replace(/\r\n/g, '\n');
+                buffer += chunk.replace(/\r\n/g, '\n');
                 if (callback) callback(buffer);
                 if (buffer.slice(-6) === '(ocd) ') {
                     let output = buffer.slice(0, -6);
@@ -197,6 +199,7 @@ class OCamlDebugSession extends DebugSession {
 
         this._launchArgs = args;
         this._debuggerProc = child_process.spawn('ocamldebug', ocdArgs);
+        this._debuggerProc.stdout.setEncoding(args.ocamldebugEncoding || 'utf-8');
         this._breakpoints = new Map();
         this._functionBreakpoints = [];
         this._variableHandles = new Handles<VariableContainer>();
@@ -216,11 +219,13 @@ class OCamlDebugSession extends DebugSession {
                     env: { "CAML_DEBUG_SOCKET": this._socket },
                     cwd: args.cd || path.dirname(args.program)
                 });
+                this._debuggeeProc.stdout.setEncoding(this._launchArgs.encoding || 'utf-8');
+                this._debuggeeProc.stderr.setEncoding(this._launchArgs.encoding || 'utf-8');
                 this._debuggeeProc.stdout.on('data', (chunk) => {
-                    this.sendEvent(new OutputEvent(chunk.toString('utf-8'), 'stdout'));
+                    this.sendEvent(new OutputEvent(chunk, 'stdout'));
                 });
                 this._debuggeeProc.stderr.on('data', (chunk) => {
-                    this.sendEvent(new OutputEvent(chunk.toString('utf-8'), 'stderr'));
+                    this.sendEvent(new OutputEvent(chunk, 'stderr'));
                 });
             }
         };
