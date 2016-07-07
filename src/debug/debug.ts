@@ -219,7 +219,12 @@ class OCamlDebugSession extends DebugSession {
         this._debuggerProc = child_process.spawn('ocamldebug', ocdArgs);
         this._debuggerProc[DECODED_STDOUT] = iconv.decodeStream(debuggerEncoding);
         this._debuggerProc.stdout.pipe(this._debuggerProc[DECODED_STDOUT]);
-        
+        this._debuggerProc[DECODED_STDERR] = iconv.decodeStream(debuggerEncoding);
+        this._debuggerProc.stderr.pipe(this._debuggerProc[DECODED_STDERR]);
+        this._debuggerProc[DECODED_STDERR].on('data', (chunk) => {
+            this.log(chunk);
+        });
+
         this._breakpoints = new Map();
         this._functionBreakpoints = [];
         this._variableHandles = new Handles<VariableContainer>();
