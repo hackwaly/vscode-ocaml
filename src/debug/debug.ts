@@ -202,9 +202,22 @@ class OCamlDebugSession extends DebugSession {
         ocdArgs.push(path.normalize(args.symbols || args.program));
 
         this._launchArgs = args;
-        
+
+        let checkEncoding = (name: string, encoding: string) => {
+            if (encoding) {
+                if (iconv.encodingExists(encoding)) {
+                    return encoding;
+                }
+                this.sendEvent(new OutputEvent(`Encoding "${encoding}" specified by option "${name}" isn't supported. Fallback to "utf-8" encoding.\n`));
+            }
+            return 'utf-8';
+        };
+
+        let debuggerEncoding = checkEncoding('ocamldebugEncoding', args.ocamldebugEncoding);
+        let debuggeeEncoding = checkEncoding('encoding', args.encoding);
+
         this._debuggerProc = child_process.spawn('ocamldebug', ocdArgs);
-        this._debuggerProc[DECODED_STDOUT] = iconv.decodeStream(args.ocamldebugEncoding || 'utf-8');
+        this._debuggerProc[DECODED_STDOUT] = iconv.decodeStream(debuggerEncoding);
         this._debuggerProc.stdout.pipe(this._debuggerProc[DECODED_STDOUT]);
         
         this._breakpoints = new Map();
@@ -227,13 +240,13 @@ class OCamlDebugSession extends DebugSession {
                     cwd: args.cd || path.dirname(args.program)
                 });
 
-                this._debuggeeProc[DECODED_STDOUT] = iconv.decodeStream(args.encoding || 'utf-8');
+                this._debuggeeProc[DECODED_STDOUT] = iconv.decodeStream(debuggeeEncoding);
                 this._debuggeeProc.stdout.pipe(this._debuggeeProc[DECODED_STDOUT]);
                 this._debuggeeProc[DECODED_STDOUT].on('data', (chunk) => {
                     this.sendEvent(new OutputEvent(chunk, 'stdout'));
                 });
 
-                this._debuggeeProc[DECODED_STDERR] = iconv.decodeStream(args.encoding || 'utf-8');
+                this._debuggeeProc[DECODED_STDERR] = iconv.decodeStream(debuggeeEncoding);
                 this._debuggeeProc.stderr.pipe(this._debuggeeProc[DECODED_STDERR]);
                 this._debuggeeProc[DECODED_STDERR].on('data', (chunk) => {
                     this.sendEvent(new OutputEvent(chunk, 'stderr'));
