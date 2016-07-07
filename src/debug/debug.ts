@@ -221,8 +221,10 @@ class OCamlDebugSession extends DebugSession {
         this._debuggerProc.stdout.pipe(this._debuggerProc[DECODED_STDOUT]);
         this._debuggerProc[DECODED_STDERR] = iconv.decodeStream(debuggerEncoding);
         this._debuggerProc.stderr.pipe(this._debuggerProc[DECODED_STDERR]);
+
         this._debuggerProc[DECODED_STDERR].on('data', (chunk) => {
-            this.log(chunk);
+            this.sendEvent(new OutputEvent(chunk));
+            this.sendEvent(new TerminatedEvent());
         });
 
         this._breakpoints = new Map();
