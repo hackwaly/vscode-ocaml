@@ -97,7 +97,7 @@ class OCamlDebugSession extends DebugSession {
     readUntilPrompt(callback?) {
         return new Promise((resolve) => {
             let buffer = '';
-            let onData = (chunk) => {
+            let onStdoutData = (chunk) => {
                 buffer += chunk.replace(/\r\n/g, '\n');
                 if (callback) callback(buffer);
                 if (buffer.slice(-6) === '(ocd) ') {
@@ -105,10 +105,15 @@ class OCamlDebugSession extends DebugSession {
                     output = output.replace(/\n$/, '');
                     this.log(`ocd: ${JSON.stringify(output)}`);
                     resolve(output);
-                    this._debuggerProc[DECODED_STDOUT].removeListener('data', onData);
+                    this._debuggerProc[DECODED_STDOUT].removeListener('data', onStdoutData);
+                    this._debuggerProc[DECODED_STDERR].removeListener('data', onStderrData);
                 }
             };
-            this._debuggerProc[DECODED_STDOUT].on('data', onData);
+            let onStderrData = (chunk) => {
+                this.sendEvent(new OutputEvent(chunk));
+            }
+            this._debuggerProc[DECODED_STDOUT].on('data', onStdoutData);
+            this._debuggerProc[DECODED_STDERR].on('data', onStderrData);
         });
     }
 
@@ -219,6 +224,8 @@ class OCamlDebugSession extends DebugSession {
         this._debuggerProc = child_process.spawn('ocamldebug', ocdArgs);
         this._debuggerProc[DECODED_STDOUT] = iconv.decodeStream(debuggerEncoding);
         this._debuggerProc.stdout.pipe(this._debuggerProc[DECODED_STDOUT]);
+        this._debuggerProc[DECODED_STDERR] = iconv.decodeStream(debuggerEncoding);
+        this._debuggerProc.stderr.pipe(this._debuggerProc[DECODED_STDERR]);
         
         this._breakpoints = new Map();
         this._functionBreakpoints = [];
