@@ -158,6 +158,7 @@ class OCamlDebugSession extends DebugSession {
         response.body.supportsConfigurationDoneRequest = true;
         response.body.supportsFunctionBreakpoints = true;
         response.body.supportsEvaluateForHovers = true;
+        response.body.supportsStepBack = true;
         this.sendResponse(response);
     }
 
@@ -389,8 +390,14 @@ class OCamlDebugSession extends DebugSession {
         this.ocdCommand(['step', 1], this.parseEvent.bind(this));
         this.sendResponse(response);
     }
+
     protected stepOutRequest(response: DebugProtocol.StepOutResponse, args: DebugProtocol.StepOutArguments): void {
         this.ocdCommand('finish', this.parseEvent.bind(this));
+        this.sendResponse(response);
+    }
+
+    protected stepBackRequest(response: DebugProtocol.StepBackResponse, args: DebugProtocol.StepBackArguments): void {
+        this.ocdCommand('backstep', this.parseEvent.bind(this));
         this.sendResponse(response);
     }
 
