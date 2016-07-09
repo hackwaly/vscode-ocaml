@@ -70,8 +70,8 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.languages.setLanguageConfiguration('ocaml', {
             indentationRules: {
-                increaseIndentPattern: /^\s*(type|let)\s[^=]*=$|\b(do|begin|struct|sig)$/,
-                decreaseIndentPattern: /\b(done|end)$/,
+                increaseIndentPattern: /^\s*(type|let)\s[^=]*=$|\b(do|begin|struct|sig|with)\s*$/,
+                decreaseIndentPattern: /\b(done|end)\s*$/,
             }
         })
     );
