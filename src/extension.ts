@@ -67,6 +67,15 @@ export function activate(context: vscode.ExtensionContext) {
         return new vscode.Range(toVsPos(start), toVsPos(end));
     };
 
+    context.subscriptions.push(
+        vscode.languages.setLanguageConfiguration('ocaml', {
+            indentationRules: {
+                increaseIndentPattern: /^\s*(type|let)\s[^=]*=$|\b(do|begin|struct|sig)$/,
+                decreaseIndentPattern: /\b(done|end)$/,
+            }
+        })
+    );
+
     context.subscriptions.push(session);
 
     context.subscriptions.push(
@@ -88,9 +97,16 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.languages.registerOnTypeFormattingEditProvider(ocamlLang, {
             async provideOnTypeFormattingEdits(document, position, ch, options, token) {
+                let isEndAt = (word) => {
+                    let wordRange = document.getWordRangeAtPosition(position);
+                    return wordRange.end.isEqual(position) && document.getText(wordRange) === word;
+                };
+                if ((ch === 'd' && !isEndAt('end')) || (ch === 'e' && !isEndAt('done'))) {
+                    return [];
+                }
                 return doOcpIndent(document.getText(), token);
             }
-        }, ';', '|', '\n')
+        }, ';', '|', ')', ']', '}', 'd', 'e')
     );
 
     context.subscriptions.push(
@@ -121,7 +137,7 @@ export function activate(context: vscode.ExtensionContext) {
                 if (token.isCancellationRequested) return null;
 
                 if (status !== 'return') return;
-                
+
                 return new vscode.CompletionList(result.entries.map(({name, kind, desc, info}) => {
                     let completionItem = new vscode.CompletionItem(name);
                     let toVsKind = (kind) => {
@@ -167,7 +183,7 @@ export function activate(context: vscode.ExtensionContext) {
                     if (file) {
                         uri = vscode.Uri.file(file);
                     }
-                    
+
                     return new vscode.Location(uri, toVsPos(pos));
                 };
 
