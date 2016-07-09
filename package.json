@@ -1,198 +1,198 @@
 {
-  "private": true,
-  "name": "ocaml",
-  "displayName": "OCaml",
-  "description": "Rich OCaml language support for Visual Studio Code",
-  "version": "0.4.18",
-  "publisher": "hackwaly",
-  "icon": "images/colour-icon.svg",
-  "engines": {
-    "vscode": "^1.0.0"
-  },
-  "categories": [
-    "Languages",
-    "Linters",
-    "Debuggers"
-  ],
-  "activationEvents": [
-    "onLanguage:ocaml",
-    "onLanguage:ocamllex",
-    "onLanguage:menhir"
-  ],
-  "main": "./out/src/extension",
-  "contributes": {
-    "languages": [
-      {
-        "id": "ocaml",
-        "aliases": [
-          "OCaml"
-        ],
-        "extensions": [
-          ".ml",
-          ".mli",
-          ".ocamlinit"
-        ],
-        "configuration": "./ocaml.configuration.json"
-      },
-      {
-        "id": "ocamllex",
-        "aliases": [
-          "OCamllex"
-        ],
-        "extensions": [
-          ".mll"
-        ],
-        "configuration": "./ocamllex.configuration.json"
-      },
-      {
-        "id": "menhir",
-        "aliases": [
-          "Menhir",
-          "OCamlyacc"
-        ],
-        "extensions": [
-          ".mly"
-        ],
-        "configuration": "./menhir.configuration.json"
-      }
+    "private": true,
+    "name": "ocaml",
+    "displayName": "OCaml",
+    "description": "Rich OCaml language support for Visual Studio Code",
+    "version": "0.4.19",
+    "publisher": "hackwaly",
+    "icon": "images/colour-icon.svg",
+    "engines": {
+        "vscode": "^1.0.0"
+    },
+    "categories": [
+        "Languages",
+        "Linters",
+        "Debuggers"
     ],
-    "grammars": [
-      {
-        "language": "ocaml",
-        "scopeName": "source.ocaml",
-        "path": "./syntaxes/OCaml.tmLanguage"
-      },
-      {
-        "language": "ocamllex",
-        "scopeName": "source.ocamllex",
-        "path": "./syntaxes/OCamllex.tmLanguage"
-      },
-      {
-        "language": "menhir",
-        "scopeName": "source.menhir",
-        "path": "./syntaxes/Menhir.tmLanguage"
-      }
+    "activationEvents": [
+        "onLanguage:ocaml",
+        "onLanguage:ocamllex",
+        "onLanguage:menhir"
     ],
-    "snippets": [
-      {
-        "language": "menhir",
-        "path": "./snippets/menhir.json"
-      }
-    ],
-    "debuggers": [
-      {
-        "type": "ocamldebug",
-        "label": "OCaml",
-        "program": "./out/src/debug/debug.js",
-        "runtime": "node",
-        "enableBreakpointsFor": {
-          "languageIds": [
-            "ocaml",
-            "ocamllex",
-            "menhir"
-          ]
-        },
-        "initialConfigurations": [
-          {
-            "name": "OCaml",
-            "type": "ocamldebug",
-            "request": "launch",
-            "program": "${workspaceRoot}/main.d.byte",
-            "stopOnEntry": false
-          }
-        ],
-        "configurationAttributes": {
-          "launch": {
-            "required": [
-              "program"
-            ],
-            "properties": {
-              "cd": {
-                "type": "string",
-                "description": "The working directory for ocamldebug."
-              },
-              "program": {
-                "type": "string",
-                "description": "The path of program to debug."
-              },
-              "arguments": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                },
-                "description": "The command-line arguments for the program."
-              },
-              "stopOnEntry": {
-                "type": "boolean",
-                "description": "Automatically stop after launch.",
-                "default": false
-              },
-              "socket": {
-                "type": "string",
-                "description": "The socket name or address for remote debug."
-              },
-              "symbols": {
-                "type": "string",
-                "description": "The path to OCaml debug symbols *.cds file."
-              },
-              "script": {
-                "type": "string",
-                "description": "The path to the debug script which you wish to run after debug session established."
-              },
-              "encoding": {
-                "type": "string",
-                "description": "The encoding which program's stdout/stderr used.",
-                "default": "utf-8"
-              },
-              "ocamldebugEncoding": {
-                "type": "string",
-                "description": "The encoding which ocamldebug's stdout/stderr used.",
-                "default": "utf-8"
-              },
-              "_showLogs": {
-                "type": "boolean",
-                "description": "Show logs which debugAdapter produced in debug window. Useful for debug debugAdapter.",
-                "default": false
-              }
+    "main": "./out/src/extension",
+    "contributes": {
+        "languages": [
+            {
+                "id": "ocaml",
+                "aliases": [
+                    "OCaml"
+                ],
+                "extensions": [
+                    ".ml",
+                    ".mli",
+                    ".ocamlinit"
+                ],
+                "configuration": "./ocaml.configuration.json"
+            },
+            {
+                "id": "ocamllex",
+                "aliases": [
+                    "OCamllex"
+                ],
+                "extensions": [
+                    ".mll"
+                ],
+                "configuration": "./ocamllex.configuration.json"
+            },
+            {
+                "id": "menhir",
+                "aliases": [
+                    "Menhir",
+                    "OCamlyacc"
+                ],
+                "extensions": [
+                    ".mly"
+                ],
+                "configuration": "./menhir.configuration.json"
             }
-          }
+        ],
+        "grammars": [
+            {
+                "language": "ocaml",
+                "scopeName": "source.ocaml",
+                "path": "./syntaxes/OCaml.tmLanguage"
+            },
+            {
+                "language": "ocamllex",
+                "scopeName": "source.ocamllex",
+                "path": "./syntaxes/OCamllex.tmLanguage"
+            },
+            {
+                "language": "menhir",
+                "scopeName": "source.menhir",
+                "path": "./syntaxes/Menhir.tmLanguage"
+            }
+        ],
+        "snippets": [
+            {
+                "language": "menhir",
+                "path": "./snippets/menhir.json"
+            }
+        ],
+        "debuggers": [
+            {
+                "type": "ocamldebug",
+                "label": "OCaml",
+                "program": "./out/src/debug/debug.js",
+                "runtime": "node",
+                "enableBreakpointsFor": {
+                    "languageIds": [
+                        "ocaml",
+                        "ocamllex",
+                        "menhir"
+                    ]
+                },
+                "initialConfigurations": [
+                    {
+                        "name": "OCaml",
+                        "type": "ocamldebug",
+                        "request": "launch",
+                        "program": "${workspaceRoot}/main.d.byte",
+                        "stopOnEntry": false
+                    }
+                ],
+                "configurationAttributes": {
+                    "launch": {
+                        "required": [
+                            "program"
+                        ],
+                        "properties": {
+                            "cd": {
+                                "type": "string",
+                                "description": "The working directory for ocamldebug."
+                            },
+                            "program": {
+                                "type": "string",
+                                "description": "The path of program to debug."
+                            },
+                            "arguments": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "description": "The command-line arguments for the program."
+                            },
+                            "stopOnEntry": {
+                                "type": "boolean",
+                                "description": "Automatically stop after launch.",
+                                "default": false
+                            },
+                            "socket": {
+                                "type": "string",
+                                "description": "The socket name or address for remote debug."
+                            },
+                            "symbols": {
+                                "type": "string",
+                                "description": "The path to OCaml debug symbols *.cds file."
+                            },
+                            "script": {
+                                "type": "string",
+                                "description": "The path to the debug script which you wish to run after debug session established."
+                            },
+                            "encoding": {
+                                "type": "string",
+                                "description": "The encoding which program's stdout/stderr used.",
+                                "default": "utf-8"
+                            },
+                            "ocamldebugEncoding": {
+                                "type": "string",
+                                "description": "The encoding which ocamldebug's stdout/stderr used.",
+                                "default": "utf-8"
+                            },
+                            "_showLogs": {
+                                "type": "boolean",
+                                "description": "Show logs which debugAdapter produced in debug window. Useful for debug debugAdapter.",
+                                "default": false
+                            }
+                        }
+                    }
+                }
+            }
+        ],
+        "configuration": {
+            "type": "object",
+            "title": "OCaml configuration",
+            "properties": {
+                "ocaml.ocpIndentPath": {
+                    "type": "string",
+                    "default": "ocp-indent"
+                },
+                "ocaml.merlinPath": {
+                    "type": "string",
+                    "default": "ocamlmerlin"
+                },
+                "ocaml.lintDelay": {
+                    "type": "number",
+                    "default": 500
+                }
+            }
         }
-      }
-    ],
-    "configuration": {
-      "type": "object",
-      "title": "OCaml configuration",
-      "properties": {
-        "ocaml.ocpIndentPath": {
-          "type": "string",
-          "default": "ocp-indent"
-        },
-        "ocaml.merlinPath": {
-          "type": "string",
-          "default": "ocamlmerlin"
-        },
-        "ocaml.lintDelay": {
-          "type": "number",
-          "default": 500
-        }
-      }
+    },
+    "scripts": {
+        "vscode:prepublish": "node ./node_modules/vscode/bin/compile",
+        "compile": "node ./node_modules/vscode/bin/compile -watch -p ./",
+        "postinstall": "node ./node_modules/vscode/bin/install"
+    },
+    "devDependencies": {
+        "typescript": "^1.8.5",
+        "vscode": "^0.11.0"
+    },
+    "dependencies": {
+        "freeport": "^1.0.5",
+        "get-stream": "^2.2.1",
+        "iconv-lite": "^0.4.13",
+        "tiny-promisify": "^0.1.1",
+        "vscode-debugadapter": "^1.10.0",
+        "vscode-debugprotocol": "^1.10.0"
     }
-  },
-  "scripts": {
-    "vscode:prepublish": "node ./node_modules/vscode/bin/compile",
-    "compile": "node ./node_modules/vscode/bin/compile -watch -p ./",
-    "postinstall": "node ./node_modules/vscode/bin/install"
-  },
-  "devDependencies": {
-    "typescript": "^1.8.5",
-    "vscode": "^0.11.0"
-  },
-  "dependencies": {
-    "freeport": "^1.0.5",
-    "get-stream": "^2.2.1",
-    "iconv-lite": "^0.4.13",
-    "tiny-promisify": "^0.1.1",
-    "vscode-debugadapter": "^1.10.0",
-    "vscode-debugprotocol": "^1.10.0"
-  }
 }
