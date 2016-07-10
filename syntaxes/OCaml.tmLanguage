@@ -266,7 +266,7 @@
 		</dict>
 		<dict>
 			<key>begin</key>
-			<string>\b(with|function)(?=(\s*$|.*-&gt;))\b|((?&lt;!\S)(\|)(?=(\w|\s).*-&gt;))</string>
+			<string>\b(with|function)(?=(?:\s*$|.*-&gt;))\b|((?&lt;!\S)(\|)(?=(\w|\s).*-&gt;))</string>
 			<key>beginCaptures</key>
 			<dict>
 				<key>1</key>

@@ -80,7 +80,7 @@ patterns:
     - include: '#typedefs'
 
 - name: meta.pattern-match.ocaml
-  begin: \b(with|function)(?=(\s*$|.*->))\b|((?<!\S)(\|)(?=(\w|\s).*->))
+  begin: \b(with|function)(?=(?:\s*$|.*->))\b|((?<!\S)(\|)(?=(\w|\s).*->))
   beginCaptures:
     '1': {name: keyword.control.match-definition.ocaml}
     '2': {name: keyword.other.function-definition.ocaml}
