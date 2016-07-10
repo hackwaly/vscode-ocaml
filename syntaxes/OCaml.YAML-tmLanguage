@@ -570,7 +570,7 @@ repository:
           \t]*))(?:.)
     - name: string.quoted.brace.ocaml
       begin: "{([a-z_]*)\\|"
-      end: "\\1\\|}"
+      end: "\\|\\1}"
 
   typedefs:
     patterns:

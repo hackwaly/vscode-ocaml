@@ -1789,7 +1789,7 @@
 					<key>begin</key>
 					<string>{([a-z_]*)\|</string>
 					<key>end</key>
-					<string>\1\|}</string>
+					<string>\|\1}</string>
 					<key>name</key>
 					<string>string.quoted.brace.ocaml</string>
 				</dict>
