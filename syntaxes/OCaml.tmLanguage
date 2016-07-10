@@ -18,6 +18,14 @@
 	<key>patterns</key>
 	<array>
 		<dict>
+			<key>include</key>
+			<string>#comments</string>
+		</dict>
+		<dict>
+			<key>include</key>
+			<string>#strings</string>
+		</dict>
+		<dict>
 			<key>captures</key>
 			<dict>
 				<key>1</key>
@@ -832,10 +840,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>match</key>
-			<string>\b(exception)\s+([A-Z][a-zA-Z0-9'_]*)(?:\s+(of))?\b</string>
-			<key>name</key>
-			<string>meta.exception.ocaml</string>
 			<key>captures</key>
 			<dict>
 				<key>1</key>
@@ -854,6 +858,10 @@
 					<string>keyword.other.ocaml</string>
 				</dict>
 			</dict>
+			<key>match</key>
+			<string>\b(exception)\s+([A-Z][a-zA-Z0-9'_]*)(?:\s+(of))?\b</string>
+			<key>name</key>
+			<string>meta.exception.ocaml</string>
 		</dict>
 		<dict>
 			<key>begin</key>
@@ -880,15 +888,7 @@
 		</dict>
 		<dict>
 			<key>include</key>
-			<string>#strings</string>
-		</dict>
-		<dict>
-			<key>include</key>
 			<string>#constants</string>
-		</dict>
-		<dict>
-			<key>include</key>
-			<string>#comments</string>
 		</dict>
 		<dict>
 			<key>include</key>
@@ -1784,6 +1784,14 @@
 							<string>invalid.illegal.character.string.escape</string>
 						</dict>
 					</array>
+				</dict>
+				<dict>
+					<key>begin</key>
+					<string>{([a-z_]*)\|</string>
+					<key>end</key>
+					<string>\1\|}</string>
+					<key>name</key>
+					<string>string.quoted.brace.ocaml</string>
 				</dict>
 			</array>
 		</dict>
