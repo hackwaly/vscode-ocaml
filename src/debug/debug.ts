@@ -110,6 +110,9 @@ class OCamlDebugSession extends DebugSession {
                 }
             };
             let onStderrData = (chunk) => {
+                // TODO: Find better way to handle this.
+                // Ignore non-error message from stderr: 'done.\n'.
+                if (chunk === 'done.\n') return;
                 this.sendEvent(new OutputEvent(chunk));
             }
             this._debuggerProc[DECODED_STDOUT].on('data', onStdoutData);
@@ -227,7 +230,7 @@ class OCamlDebugSession extends DebugSession {
         this._debuggerProc.stdout.pipe(this._debuggerProc[DECODED_STDOUT]);
         this._debuggerProc[DECODED_STDERR] = iconv.decodeStream(debuggerEncoding);
         this._debuggerProc.stderr.pipe(this._debuggerProc[DECODED_STDERR]);
-        
+
         this._breakpoints = new Map();
         this._functionBreakpoints = [];
         this._variableHandles = new Handles<VariableContainer>();
