@@ -306,6 +306,10 @@
 			<array>
 				<dict>
 					<key>include</key>
+					<string>#comments</string>
+				</dict>
+				<dict>
+					<key>include</key>
 					<string>#matchpatterns</string>
 				</dict>
 			</array>

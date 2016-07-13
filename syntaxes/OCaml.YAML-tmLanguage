@@ -90,6 +90,7 @@ patterns:
     '1': {name: punctuation.separator.match-definition.ocaml}
     '2': {name: keyword.control.match-condition.ocaml}
   patterns:
+  - include: '#comments' 
   - include: '#matchpatterns'
 
 - name: meta.class.type-definition.ocaml
