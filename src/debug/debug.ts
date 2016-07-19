@@ -449,11 +449,11 @@ class OCamlDebugSession extends DebugSession {
                 case 'tuple':
                     return `(${value.items.map(repr).join(', ')})`;
                 case 'array':
-                    return `[|${value.items.map(repr).join('; ')}|]`;
+                    return `<array>`;
                 case 'list':
-                    return `[${value.items.map(repr).join('; ')}]`;
+                    return `<list>`;
                 case 'record':
-                    return `{${value.items.map(({name, value}) => `${name} = ${repr(value)}`).join('; ')}}`;
+                    return `<record>`;
             }
         };
 
