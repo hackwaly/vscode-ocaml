@@ -272,7 +272,11 @@ export function activate(context: vscode.ExtensionContext) {
                         lines.push(end);
                     }
                     type = lines.join('\n');
-                } else if (!type.startsWith('type ')) {
+                }
+                
+                if (/^sig\b/.test(type)) {
+                    type = `module type _ = ${type}`;
+                } else if (!/^type\b/.test(type)) {
                     type = `type _ = ${type}`;
                 }
 
