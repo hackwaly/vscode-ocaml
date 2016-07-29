@@ -24,6 +24,7 @@ let DECODED_STDERR = Symbol();
 
 interface LaunchRequestArguments {
     cd: string;
+    includePath?: string[]; 
     program: string;
     arguments?: string[];
     stopOnEntry: boolean;
@@ -194,6 +195,12 @@ class OCamlDebugSession extends DebugSession {
         let ocdArgs = [];
         if (args.cd) {
             ocdArgs.push('-cd', args.cd);
+        }
+
+        if (args.includePath) {
+            args.includePath.forEach((path) => {
+                ocdArgs.push('-I', path);
+            });
         }
 
         this._remoteMode = !!args.socket;

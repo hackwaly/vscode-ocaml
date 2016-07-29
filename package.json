@@ -111,6 +111,13 @@
                                 "type": "string",
                                 "description": "The working directory for ocamldebug."
                             },
+                            "includePath": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "description": "The list of include directories for ocamldebug."
+                            },
                             "program": {
                                 "type": "string",
                                 "description": "The path of program to debug."
