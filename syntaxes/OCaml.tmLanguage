@@ -170,7 +170,7 @@
 				</dict>
 			</dict>
 			<key>end</key>
-			<string>(\))|(?=\bend\b)</string>
+			<string>(\))</string>
 			<key>endCaptures</key>
 			<dict>
 				<key>1</key>
@@ -222,17 +222,13 @@
 		</dict>
 		<dict>
 			<key>begin</key>
-			<string>^\s*(?=type)\b</string>
+			<string>^\s*(?=type\s)</string>
 			<key>end</key>
-			<string>\b(?=let|end|val)</string>
+			<string>\b(?=let|end|val)|^\s*$</string>
 			<key>name</key>
 			<string>meta.type-definition-group.ocaml</string>
 			<key>patterns</key>
 			<array>
-				<dict>
-					<key>include</key>
-					<string>#comments</string>
-				</dict>
 				<dict>
 					<key>begin</key>
 					<string>\b(type|and)\s+([^=]*)(=)</string>

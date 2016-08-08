@@ -50,7 +50,7 @@ patterns:
   begin: (\(|\s)(?=fun\s)
   beginCaptures:
     '1': {name: punctuation.definition.function.anonymous.ocaml}
-  end: (\))|(?=\bend\b)
+  end: (\))
   endCaptures:
     '1': {name: punctuation.definition.function.anonymous.ocaml}
   patterns:
@@ -66,10 +66,9 @@ patterns:
   - include: $self
 
 - name: meta.type-definition-group.ocaml
-  begin: ^\s*(?=type)\b
-  end: \b(?=let|end|val)
+  begin: ^\s*(?=type\s)
+  end: \b(?=let|end|val)|^\s*$
   patterns:
-  - include: '#comments'
   - name: meta.type-definition.ocaml
     begin: \b(type|and)\s+([^=]*)(=)
     beginCaptures:
