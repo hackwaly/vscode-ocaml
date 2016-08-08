@@ -21,6 +21,14 @@
 		</dict>
 		<dict>
 			<key>include</key>
+			<string>#character_literal</string>
+		</dict>
+		<dict>
+			<key>include</key>
+			<string>#character_literal_crossline</string>
+		</dict>
+		<dict>
+			<key>include</key>
 			<string>#string_literal</string>
 		</dict>
 		<dict>
@@ -29,15 +37,43 @@
 		</dict>
 		<dict>
 			<key>include</key>
+			<string>#numeric_literal</string>
+		</dict>
+		<dict>
+			<key>include</key>
 			<string>#keyword</string>
+		</dict>
+		<dict>
+			<key>include</key>
+			<string>#constant_keyword</string>
 		</dict>
 		<dict>
 			<key>include</key>
 			<string>#operator_keyword</string>
 		</dict>
+		<dict>
+			<key>include</key>
+			<string>#ident</string>
+		</dict>
 	</array>
 	<key>repository</key>
 	<dict>
+		<key>character_literal</key>
+		<dict>
+			<key>match</key>
+			<string>'(?:[^\\'\r\n]|\\(?:[\\'"ntbr ]|[0-9]{3}|o[0-3][0-7]{2}|x[0-9a-fA-F]{2}))'</string>
+			<key>name</key>
+			<string>constant.character.ocaml</string>
+		</dict>
+		<key>character_literal_crossline</key>
+		<dict>
+			<key>begin</key>
+			<string>'$</string>
+			<key>end</key>
+			<string>^'|(?=.)</string>
+			<key>name</key>
+			<string>constant.character.ocaml</string>
+		</dict>
 		<key>comment</key>
 		<dict>
 			<key>begin</key>
@@ -77,6 +113,13 @@
 				</dict>
 			</array>
 		</dict>
+		<key>constant_keyword</key>
+		<dict>
+			<key>match</key>
+			<string>\b(?:true|false)\b</string>
+			<key>name</key>
+			<string>constant.language.ocaml</string>
+		</dict>
 		<key>hash_bang</key>
 		<dict>
 			<key>begin</key>
@@ -101,12 +144,26 @@
 			<key>name</key>
 			<string>meta.hashbang.multiline.ocaml</string>
 		</dict>
+		<key>ident</key>
+		<dict>
+			<key>match</key>
+			<string>[a-zA-Z_][a-zA-Z_0-9]*</string>
+			<key>name</key>
+			<string>entity.name</string>
+		</dict>
 		<key>keyword</key>
 		<dict>
 			<key>match</key>
-			<string>\b(?:and|as|assert|begin|class|constraint|do|done|downto|else|end|exception|external|false|for|fun|function|functor|if|in|include|inherit|initializer|lazy|let|match|method|module|mutable|new|nonrec|object|of|open|or|parser|private|rec|sig|struct|then|to|true|try|type|val|virtual|when|while|with)\b</string>
+			<string>\b(?:and|as|assert|begin|class|constraint|do|done|downto|else|end|exception|external|for|fun|function|functor|if|in|include|inherit|initializer|lazy|let|match|method|module|mutable|new|nonrec|object|of|open|or|parser|private|rec|sig|struct|then|to|try|type|val|virtual|when|while|with)\b</string>
 			<key>name</key>
 			<string>keyword.ocaml</string>
+		</dict>
+		<key>numeric_literal</key>
+		<dict>
+			<key>match</key>
+			<string>(?:[0-9][0-9_]*(?:\.[0-9_]*)?(?:[eE][+-]?[0-9][0-9_]*)?|0[xX][0-9a-fA-F][0-9a-fA-F_]*(?:\.[0-9a-fA-F_]*)?(?:[pP][+-]?[0-9][0-9_]*)?|0[oO][0-7][0-7_]*|0[bB][01][01_]*)[g-z]?</string>
+			<key>name</key>
+			<string>constant.numeric.ocaml</string>
 		</dict>
 		<key>operator_keyword</key>
 		<dict>
@@ -127,6 +184,8 @@
 					<string>keyword.operator.delimiter.ocaml</string>
 				</dict>
 			</dict>
+			<key>contentName</key>
+			<string>string.unquoted.ocaml</string>
 			<key>end</key>
 			<string>\|\1}</string>
 			<key>endCaptures</key>
@@ -137,8 +196,6 @@
 					<string>keyword.operator.delimiter.ocaml</string>
 				</dict>
 			</dict>
-			<key>name</key>
-			<string>string.unquoted.ocaml</string>
 		</dict>
 		<key>string_literal</key>
 		<dict>
@@ -152,7 +209,7 @@
 			<array>
 				<dict>
 					<key>match</key>
-					<string>\\($|[\\'"ntbr ]|[0-9]{3}|o[0-3][0-7]{2}|x[0-9a-fA-F]{2})</string>
+					<string>\\(?:$|[\\'"ntbr ]|[0-9]{3}|o[0-3][0-7]{2}|x[0-9a-fA-F]{2})</string>
 					<key>name</key>
 					<string>constant.character.escape.ocaml</string>
 				</dict>

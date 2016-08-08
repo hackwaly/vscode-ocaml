@@ -9,10 +9,15 @@ uuid: F816FA69-6EE8-11D9-BF2D-000D93589AF6
 patterns:
 - include: '#hash_bang'
 - include: '#comment'
+- include: '#character_literal'
+- include: '#character_literal_crossline'
 - include: '#string_literal'
 - include: '#quoted_string_literal'
+- include: '#numeric_literal'
 - include: '#keyword'
+- include: '#constant_keyword'
 - include: '#operator_keyword'
+- include: '#ident'
 
 repository:
   comment:
@@ -30,24 +35,37 @@ repository:
       begin: '{([a-z_]*)\|'
       end: '\|\1}'
 
+  character_literal:
+    name: constant.character.ocaml
+    match: "'(?:[^\\\\'\\r\\n]|\\\\(?:[\\\\'\"ntbr ]|[0-9]{3}|o[0-3][0-7]{2}|x[0-9a-fA-F]{2}))'"
+
+  character_literal_crossline:
+    name: constant.character.ocaml
+    begin: "'$"
+    end: "^'|(?=.)"
+
   string_literal:
     name: string.quoted.ocaml
     begin: '"'
     end: '"'
     patterns:
     - name: constant.character.escape.ocaml
-      match: "\\\\($|[\\\\'\"ntbr ]|[0-9]{3}|o[0-3][0-7]{2}|x[0-9a-fA-F]{2})"
+      match: "\\\\(?:$|[\\\\'\"ntbr ]|[0-9]{3}|o[0-3][0-7]{2}|x[0-9a-fA-F]{2})"
     - name: invalid.illegal.ocaml
       match: '\\.'
 
   quoted_string_literal:
-    name: string.unquoted.ocaml
+    contentName: string.unquoted.ocaml
     begin: '{([a-z_]*)\|'
     beginCaptures: 
       '0': { name: keyword.operator.delimiter.ocaml }
     end: '\|\1}'
-    endCaptures:  
+    endCaptures:
       '0': { name: keyword.operator.delimiter.ocaml }
+
+  numeric_literal:
+    name: constant.numeric.ocaml
+    match: '(?:[0-9][0-9_]*(?:\.[0-9_]*)?(?:[eE][+-]?[0-9][0-9_]*)?|0[xX][0-9a-fA-F][0-9a-fA-F_]*(?:\.[0-9a-fA-F_]*)?(?:[pP][+-]?[0-9][0-9_]*)?|0[oO][0-7][0-7_]*|0[bB][01][01_]*)[g-z]?'
 
   hash_bang:
     name: meta.hashbang.multiline.ocaml
@@ -60,8 +78,16 @@ repository:
 
   keyword:
     name: keyword.ocaml
-    match: '\b(?:and|as|assert|begin|class|constraint|do|done|downto|else|end|exception|external|false|for|fun|function|functor|if|in|include|inherit|initializer|lazy|let|match|method|module|mutable|new|nonrec|object|of|open|or|parser|private|rec|sig|struct|then|to|true|try|type|val|virtual|when|while|with)\b'
+    match: '\b(?:and|as|assert|begin|class|constraint|do|done|downto|else|end|exception|external|for|fun|function|functor|if|in|include|inherit|initializer|lazy|let|match|method|module|mutable|new|nonrec|object|of|open|or|parser|private|rec|sig|struct|then|to|try|type|val|virtual|when|while|with)\b'
+
+  constant_keyword:
+    name: constant.language.ocaml
+    match: '\b(?:true|false)\b'
 
   operator_keyword:
     name: keyword.operator.ocaml
     match: '\b(?:lor|lxor|mod|land|lsl|lsr|asr)\b'
+
+  ident:
+    name: entity.name
+    match: "[a-zA-Z_][a-zA-Z_0-9]*"
