@@ -231,7 +231,7 @@
 			<array>
 				<dict>
 					<key>begin</key>
-					<string>\b(type|and)\s+([^=]*)(=)?</string>
+					<string>\b(type|and)\s+([^=]*)(=)</string>
 					<key>beginCaptures</key>
 					<dict>
 						<key>1</key>
@@ -261,6 +261,32 @@
 							<string>#typedefs</string>
 						</dict>
 					</array>
+				</dict>
+				<dict>
+					<key>begin</key>
+					<string>\b(type|and)\s+([^=]*)</string>
+					<key>beginCaptures</key>
+					<dict>
+						<key>1</key>
+						<dict>
+							<key>name</key>
+							<string>keyword.other.type-definition.ocaml</string>
+						</dict>
+						<key>2</key>
+						<dict>
+							<key>name</key>
+							<string>storage.type.ocaml</string>
+						</dict>
+						<key>3</key>
+						<dict>
+							<key>name</key>
+							<string>punctuation.separator.type-definition.ocaml</string>
+						</dict>
+					</dict>
+					<key>end</key>
+					<string>(?=\b(type|and|let|end|val)\b)|(?=^\s*$)</string>
+					<key>name</key>
+					<string>meta.type-definition.ocaml</string>
 				</dict>
 			</array>
 		</dict>

@@ -70,7 +70,7 @@ patterns:
   end: \b(?=let|end|val)|^\s*$
   patterns:
   - name: meta.type-definition.ocaml
-    begin: \b(type|and)\s+([^=]*)(=)?
+    begin: \b(type|and)\s+([^=]*)(=)
     beginCaptures:
       '1': {name: keyword.other.type-definition.ocaml}
       '2': {name: storage.type.ocaml}
@@ -78,6 +78,13 @@ patterns:
     end: (?=\b(type|and|let|end|val)\b)|(?=^\s*$)
     patterns:
     - include: '#typedefs'
+  - name: meta.type-definition.ocaml
+    begin: \b(type|and)\s+([^=]*)
+    beginCaptures:
+      '1': {name: keyword.other.type-definition.ocaml}
+      '2': {name: storage.type.ocaml}
+      '3': {name: punctuation.separator.type-definition.ocaml}
+    end: (?=\b(type|and|let|end|val)\b)|(?=^\s*$)
 
 - name: meta.pattern-match.ocaml
   begin: \b(with|function)(?=(?:\s*$|.*->))\b|((?<!\S)(\|)(?=(\w|\s).*->))
