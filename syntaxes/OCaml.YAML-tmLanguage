@@ -66,9 +66,10 @@ patterns:
   - include: $self
 
 - name: meta.type-definition-group.ocaml
-  begin: ^\s*(?=type\s)
-  end: \b(?=let|end|val)|^\s*$
+  begin: ^\s*(?=type)\b
+  end: \b(?=let|end|val)
   patterns:
+  - include: '#comments'
   - name: meta.type-definition.ocaml
     begin: \b(type|and)\s+([^=]*)(=)
     beginCaptures:
