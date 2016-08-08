@@ -50,7 +50,7 @@ patterns:
   begin: (\(|\s)(?=fun\s)
   beginCaptures:
     '1': {name: punctuation.definition.function.anonymous.ocaml}
-  end: (\))
+  end: (\))|(?=\bend\b)
   endCaptures:
     '1': {name: punctuation.definition.function.anonymous.ocaml}
   patterns:
