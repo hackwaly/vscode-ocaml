@@ -30,5 +30,5 @@ list
 value_list = head:value tail:(_ ';' _ value)* { return fixList1(head, tail); }
 string = value:$('"' ([^\\"] / '\\' .)* '"') { return {kind: 'plain', value: value}; }
 char = value:$('\'' ([^\\'] / '\\\'' / '\\' [^']+) '\'') { return {kind: 'plain', value: value}; }
-plain = value:$([^{}[\](),;]+) { return {kind: 'plain', value:value}; }
+plain = value:$([^{}[\](),;|]+) { return {kind: 'plain', value:value}; }
 _ = $([ \t\r\n]*) {}
