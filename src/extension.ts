@@ -345,7 +345,9 @@ export function activate(context: vscode.ExtensionContext) {
 
         if (status !== 'return') return;
 
-        return result.map(({type, start, end, message}) => {
+        let diagnostics = [];
+
+        result.map(({type, start, end, message}) => {
             let fromType = (type) => {
                 switch (type) {
                     case 'type':
@@ -358,11 +360,41 @@ export function activate(context: vscode.ExtensionContext) {
                 }
             };
 
-            return new vscode.Diagnostic(
-                toVsRange(start, end),
-                message,
-                fromType(type.toLowerCase()));
+            if (type === 'type' &&
+                message.startsWith('Error: Signature mismatch:') &&
+                message.includes(': Actual declaration')) {
+                let regex = /^\s*File ("[^"]+"), line (\d+), characters (\d+)-(\d+): Actual declaration$/mg;
+                for (let match; (match = regex.exec(message)) !== null;) {
+                    let file = JSON.parse(match[1]);
+                    let line = JSON.parse(match[2]);
+                    let col1 = JSON.parse(match[3]);
+                    let col2 = JSON.parse(match[4]);
+                    
+                    if (Path.basename(file) === Path.basename(document.fileName)) {
+                        diagnostics.push(
+                            new vscode.Diagnostic(
+                                toVsRange({line, col: col1}, {line, col: col2}),
+                                message,
+                                fromType(type.toLowerCase())
+                            )
+                        );
+                    } else {
+                        // Log here?
+                    }
+                }
+                return;
+            }
+
+            diagnostics.push(
+                new vscode.Diagnostic(
+                    toVsRange(start, end),
+                    message,
+                    fromType(type.toLowerCase())
+                )
+            );
         });
+
+        return diagnostics;
     };
 
     let LINTER_DEBOUNCE_TIMER = Symbol();
