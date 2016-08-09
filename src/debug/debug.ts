@@ -513,6 +513,8 @@ class OCamlDebugSession extends DebugSession {
         try {
             let data = evalResultParser.parse(text);
             let variable = createVariable(data.name, data.value);
+            // Showing type here instead of short representation.
+            (variable as DebugProtocol.Variable).value = data.type;
             (variable as DebugProtocol.Variable).type = data.type;
             return variable;
         } catch (ex) {
