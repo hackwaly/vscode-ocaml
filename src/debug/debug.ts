@@ -481,18 +481,40 @@ class OCamlDebugSession extends DebugSession {
         };
 
         let createVariable = (name: string, value: any): Variable => {
+            let text = repr(value);
+            let numIndexed;
+            let numNamed;
+            
             switch (value.kind) {
                 case 'plain':
-                    return new Variable(name, repr(value));
-                default:
-                    return new Variable(name, repr(value),
-                        this._variableHandles.create(new Expander(expander(value))));
+                    return new Variable(name, text);
+                case 'con':
+                    numNamed = 1;
+                    numIndexed = 0;
+                    break;
+                case 'record':
+                case 'tuple':
+                    numNamed = value.items.length;
+                    numIndexed = 0;
+                    break;
+                case 'list':
+                case 'array':
+                    numIndexed = value.items.length;
+                    numNamed = 0;
+                    break;
             }
+
+            return new Variable(name, text,
+                this._variableHandles.create(new Expander(expander(value))),
+                numIndexed, numNamed
+            );
         };
 
         try {
             let data = evalResultParser.parse(text);
-            return createVariable(data.name, data.value);
+            let variable = createVariable(data.name, data.value);
+            (variable as DebugProtocol.Variable).type = data.type;
+            return variable;
         } catch (ex) {
             let start = ex.location.start.offset;
             let end = Math.max(ex.location.end.offset, Math.min(start + 16, text.length));
@@ -502,27 +524,36 @@ class OCamlDebugSession extends DebugSession {
         }
     }
 
-	protected variablesRequest(response: DebugProtocol.VariablesResponse, args: DebugProtocol.VariablesArguments): void {
-		const reference = args.variablesReference;
-		const variablesContainer = this._variableHandles.get(reference);
-		if (variablesContainer) {
-			variablesContainer.expand(this).then(variables => {
-				response.body = {
-					variables: variables
-				};
-				this.sendResponse(response);
-			}).catch(err => {
-				response.body = {
-					variables: []
-				};
-				this.sendResponse(response);
-			});
-		} else {
-			response.body = {
-				variables: []
-			};
-			this.sendResponse(response);
-		}
+	protected async variablesRequest(response: DebugProtocol.VariablesResponse, args: DebugProtocol.VariablesArguments) {
+		let reference = args.variablesReference;
+        let variablesContainer = this._variableHandles.get(reference);
+        let variables = [];
+
+        if (variablesContainer) {
+            try {
+                variables = await variablesContainer.expand(this);
+            } catch (ex) { }
+        }
+        
+        let filteredVariables = variables;
+        if (args.filter === 'named') {
+            filteredVariables = variables.filter((variable) => !/^[0-9]+$/.test(variable.name));
+        } else if (args.filter === 'indexed') {
+            filteredVariables = variables.filter((variable) => {
+                if (/^[0-9]+$/.test(variable.name)) {
+                    if (!args.count) {
+                        return true;
+                    }
+                    let index = parseInt(variable.name);
+                    let start = args.start || 0;
+                    return index >= start && index < start + args.count;
+                }
+                return false;
+            });
+        }
+
+        response.body = { variables: filteredVariables };
+		this.sendResponse(response);
 	}
 
     protected evaluateRequest(response: DebugProtocol.EvaluateResponse, args: DebugProtocol.EvaluateArguments) {
@@ -530,7 +561,13 @@ class OCamlDebugSession extends DebugSession {
             this.ocdCommand(['print', `(${args.expression})`], (result) => {
                 let variable = this.parseEvalResult(result);
                 if (variable) {
-                    response.body = { result: variable.value, variablesReference: variable.variablesReference };
+                    response.body = {
+                        result: variable.value,
+                        variablesReference: variable.variablesReference,
+                        type: (variable as DebugProtocol.Variable).type,
+                        indexedVariables: (variable as DebugProtocol.Variable).indexedVariables,
+                        namedVariables: (variable as DebugProtocol.Variable).namedVariables,
+                    };
                     this.sendResponse(response);
                 } else {
                     this.sendResponse(response);
@@ -551,7 +588,7 @@ class OCamlDebugSession extends DebugSession {
 
                 let content = lines.map((line) => {
                     // FIXME: make sure do not accidently replace "<|a|>" in a string or comment.
-                    return line.replace(/^\d+ /, '').replace(/<\|[a-z]+\|>/, '$1');
+                    return line.replace(/^\d+ /, '').replace(/<\|[ab]\|>/, '$1');
                 }).join('\n');
 
                 resolve(content);
