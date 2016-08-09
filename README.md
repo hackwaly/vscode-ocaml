@@ -45,6 +45,12 @@ In VS Code, `*.ml` is associated to F# by default, You need manually config this
 
 ## Release Notes
 
+### 0.5.0
+
+Support debug variable paging.
+Support highlight occurrences and refactor in file.
+[More Info](https://github.com/hackwaly/vscode-ocaml/milestone/1?closed=1)
+
 ### 0.4.0
 
 Add Windows debug support.
