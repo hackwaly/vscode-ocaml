@@ -296,6 +296,46 @@ export function activate(context: vscode.ExtensionContext) {
         })
     );
 
+    context.subscriptions.push(
+        vscode.languages.registerDocumentHighlightProvider(ocamlLang, {
+            async provideDocumentHighlights(document, position, token) {
+                await session.syncBuffer(document.fileName, document.getText(), token);
+                if (token.isCancellationRequested) return null;
+
+                let [status, result] = await session.request(['occurrences', 'ident', 'at', fromVsPos(position)]);
+                if (token.isCancellationRequested) return null;
+
+                if (status !== 'return' || result.length <= 0) return;
+
+                return result.map((item) => {
+                    return new vscode.DocumentHighlight(toVsRange(item.start, item.end));
+                });
+            }
+        })
+    );
+
+    context.subscriptions.push(
+        vscode.languages.registerRenameProvider(ocamlLang, {
+            async provideRenameEdits(document, position, newName, token) {
+                await session.syncBuffer(document.fileName, document.getText(), token);
+                if (token.isCancellationRequested) return null;
+
+                let [status, result] = await session.request(['occurrences', 'ident', 'at', fromVsPos(position)]);
+                if (token.isCancellationRequested) return null;
+
+                if (status !== 'return' || result.length <= 0) return;
+
+                let edits = result.map((item) => {
+                    return new vscode.TextEdit(toVsRange(item.start, item.end), newName);
+                });
+
+                let edit = new vscode.WorkspaceEdit();
+                edit.set(document.uri, edits);
+                return edit;
+            }
+        })
+    );
+
     let provideLinter = async (document: vscode.TextDocument, token) => {
         await session.syncBuffer(document.fileName, document.getText(), token);
         if (token.isCancellationRequested) return null;
