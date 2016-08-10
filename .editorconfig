@@ -1,2 +1,2 @@
-[*.json]
+[*.{json,YAML-tmLanguage}]
 indent_size = 2
