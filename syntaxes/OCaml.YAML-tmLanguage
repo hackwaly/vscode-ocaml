@@ -30,7 +30,7 @@ patterns:
     captures:
       '1': {name: punctuation.separator.module-reference.ocaml}
 
-- name: meta.function.ocaml
+- name: meta.let-function.ocaml
   begin: \b(let|and)\s+(?!\(\*)((rec\s+)([a-z_][a-zA-Z0-9_']*)\b|([a-z_][a-zA-Z0-9_']*|\([^)]+\))(?=\s)((?=\s*=\s*(?=fun(?:ction)\b))|(?!\s*=)))
   beginCaptures:
     '1': {name: keyword.other.function-definition.ocaml}
@@ -46,15 +46,15 @@ patterns:
   patterns:
   - include: '#variables'
 
-- name: meta.function.anonymous.ocaml
+- name: meta.anonymous-function.ocaml
   begin: (\(|\s)(?=fun\s)
   beginCaptures:
-    '1': {name: punctuation.definition.function.anonymous.ocaml}
+    '1': {name: punctuation.definition.anonymous-function.ocaml}
   end: (\))
   endCaptures:
-    '1': {name: punctuation.definition.function.anonymous.ocaml}
+    '1': {name: punctuation.definition.anonymous-function.ocaml}
   patterns:
-  - name: meta.function.anonymous.definition.ocaml
+  - name: meta.anonymous-function.definition.ocaml
     begin: (?<=(\(|\s))(fun)\s
     beginCaptures:
       '2': {name: keyword.other.function-definition.ocaml}
@@ -97,7 +97,7 @@ patterns:
     '1': {name: punctuation.separator.match-definition.ocaml}
     '2': {name: keyword.control.match-condition.ocaml}
   patterns:
-  - include: '#comments' 
+  - include: '#comments'
   - include: '#matchpatterns'
 
 - name: meta.class.type-definition.ocaml

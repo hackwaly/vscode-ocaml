@@ -149,7 +149,7 @@
 				</dict>
 			</dict>
 			<key>name</key>
-			<string>meta.function.ocaml</string>
+			<string>meta.let-function.ocaml</string>
 			<key>patterns</key>
 			<array>
 				<dict>
@@ -166,7 +166,7 @@
 				<key>1</key>
 				<dict>
 					<key>name</key>
-					<string>punctuation.definition.function.anonymous.ocaml</string>
+					<string>punctuation.definition.anonymous-function.ocaml</string>
 				</dict>
 			</dict>
 			<key>end</key>
@@ -176,11 +176,11 @@
 				<key>1</key>
 				<dict>
 					<key>name</key>
-					<string>punctuation.definition.function.anonymous.ocaml</string>
+					<string>punctuation.definition.anonymous-function.ocaml</string>
 				</dict>
 			</dict>
 			<key>name</key>
-			<string>meta.function.anonymous.ocaml</string>
+			<string>meta.anonymous-function.ocaml</string>
 			<key>patterns</key>
 			<array>
 				<dict>
@@ -205,7 +205,7 @@
 						</dict>
 					</dict>
 					<key>name</key>
-					<string>meta.function.anonymous.definition.ocaml</string>
+					<string>meta.anonymous-function.definition.ocaml</string>
 					<key>patterns</key>
 					<array>
 						<dict>
