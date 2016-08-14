@@ -1533,12 +1533,12 @@
 								<key>1</key>
 								<dict>
 									<key>name</key>
-									<string>punctuation.definition.optional-parameter.ocaml</string>
+									<string>keyword.other.question-mark.optional-parameter.ocaml</string>
 								</dict>
 								<key>2</key>
 								<dict>
 									<key>name</key>
-									<string>entity.name.tag.label.optional.ocaml</string>
+									<string>variable.parameter.label.optional.ocaml</string>
 								</dict>
 								<key>3</key>
 								<dict>
@@ -1546,10 +1546,10 @@
 									<string>punctuation.separator.optional-parameter.ocaml</string>
 								</dict>
 							</dict>
+							<key>comment</key>
+							<string>variable.parameter.ameter.optional.ocaml</string>
 							<key>match</key>
 							<string>(\?)([a-z][a-zA-Z0-9_]*)\s*(:)</string>
-							<key>name</key>
-							<string>variable.parameter.ameter.optional.ocaml</string>
 						</dict>
 						<dict>
 							<key>begin</key>
@@ -1559,7 +1559,7 @@
 								<key>1</key>
 								<dict>
 									<key>name</key>
-									<string>entity.name.tag.label.ocaml</string>
+									<string>variable.parameter.label.ocaml</string>
 								</dict>
 								<key>2</key>
 								<dict>
@@ -1572,10 +1572,10 @@
 									<string>storage.type.ocaml</string>
 								</dict>
 							</dict>
+							<key>comment</key>
+							<string>variable.parameter.labeled.ocaml</string>
 							<key>end</key>
 							<string>\s</string>
-							<key>name</key>
-							<string>variable.parameter.labeled.ocaml</string>
 							<key>patterns</key>
 							<array>
 								<dict>
@@ -1623,12 +1623,12 @@
 								<key>1</key>
 								<dict>
 									<key>name</key>
-									<string>punctuation.definition.optional-parameter.ocaml</string>
+									<string>keyword.other.question-mark.optional-parameter.ocaml</string>
 								</dict>
 								<key>2</key>
 								<dict>
 									<key>name</key>
-									<string>entity.name.tag.label.optional.ocaml</string>
+									<string>variable.parameter.label.optional.ocaml</string>
 								</dict>
 								<key>3</key>
 								<dict>
@@ -1636,10 +1636,10 @@
 									<string>punctuation.separator.optional-parameter.ocaml</string>
 								</dict>
 							</dict>
+							<key>comment</key>
+							<string>variable.parameter.optional.ocaml</string>
 							<key>match</key>
 							<string>(\?)([a-z][a-zA-Z0-9_]*)\s*(:)</string>
-							<key>name</key>
-							<string>variable.parameter.optional.ocaml</string>
 						</dict>
 						<dict>
 							<key>begin</key>
@@ -1649,12 +1649,12 @@
 								<key>1</key>
 								<dict>
 									<key>name</key>
-									<string>punctuation.definition.labeled-parameter.ocaml</string>
+									<string>keyword.other.tilde.labeled-parameter.ocaml</string>
 								</dict>
 								<key>2</key>
 								<dict>
 									<key>name</key>
-									<string>entity.name.tag.label.ocaml</string>
+									<string>variable.parameter.label.ocaml</string>
 								</dict>
 								<key>3</key>
 								<dict>
@@ -1662,10 +1662,10 @@
 									<string>punctuation.separator.label.ocaml</string>
 								</dict>
 							</dict>
+							<key>comment</key>
+							<string>variable.parameter.labeled.ocaml</string>
 							<key>end</key>
 							<string>\s</string>
-							<key>name</key>
-							<string>variable.parameter.labeled.ocaml</string>
 							<key>patterns</key>
 							<array>
 								<dict>
@@ -1906,12 +1906,6 @@
 			<key>patterns</key>
 			<array>
 				<dict>
-					<key>match</key>
-					<string>\(\)</string>
-					<key>name</key>
-					<string>variable.parameter.unit.ocaml</string>
-				</dict>
-				<dict>
 					<key>include</key>
 					<string>#constants</string>
 				</dict>
@@ -1927,12 +1921,12 @@
 						<key>1</key>
 						<dict>
 							<key>name</key>
-							<string>punctuation.definition.labeled-parameter.ocaml</string>
+							<string>keyword.other.tilde.labeled-parameter.ocaml</string>
 						</dict>
 						<key>2</key>
 						<dict>
 							<key>name</key>
-							<string>entity.name.tag.label.ocaml</string>
+							<string>variable.parameter.label.ocaml</string>
 						</dict>
 						<key>3</key>
 						<dict>
@@ -1940,10 +1934,10 @@
 							<string>punctuation.separator.label.ocaml</string>
 						</dict>
 					</dict>
+					<key>comment</key>
+					<string>variable.parameter.labeled.ocaml</string>
 					<key>end</key>
 					<string>(?=(-&gt;|\s))</string>
-					<key>name</key>
-					<string>variable.parameter.labeled.ocaml</string>
 					<key>patterns</key>
 					<array>
 						<dict>
@@ -1958,18 +1952,18 @@
 						<key>1</key>
 						<dict>
 							<key>name</key>
-							<string>punctuation.definition.optional-parameter.ocaml</string>
+							<string>keyword.other.question-mark.optional-parameter.ocaml</string>
 						</dict>
 						<key>2</key>
 						<dict>
 							<key>name</key>
-							<string>entity.name.tag.label.optional.ocaml</string>
+							<string>variable.parameter.label.optional.ocaml</string>
 						</dict>
 					</dict>
+					<key>comment</key>
+					<string>variable.parameter.optional.ocaml</string>
 					<key>match</key>
 					<string>(\?)([a-z][a-zA-Z0-9_]*)</string>
-					<key>name</key>
-					<string>variable.parameter.optional.ocaml</string>
 				</dict>
 				<dict>
 					<key>begin</key>
@@ -1979,7 +1973,7 @@
 						<key>1</key>
 						<dict>
 							<key>name</key>
-							<string>punctuation.definition.optional-parameter.ocaml</string>
+							<string>keyword.other.question-mark.optional-parameter.ocaml</string>
 						</dict>
 						<key>2</key>
 						<dict>
@@ -1989,7 +1983,7 @@
 						<key>3</key>
 						<dict>
 							<key>name</key>
-							<string>entity.name.tag.label.optional.ocaml</string>
+							<string>variable.parameter.label.optional.ocaml</string>
 						</dict>
 						<key>4</key>
 						<dict>
@@ -1997,6 +1991,8 @@
 							<string>punctuation.separator.optional-parameter-assignment.ocaml</string>
 						</dict>
 					</dict>
+					<key>comment</key>
+					<string>variable.parameter.optional.ocaml</string>
 					<key>end</key>
 					<string>(\))</string>
 					<key>endCaptures</key>
@@ -2007,8 +2003,6 @@
 							<string>punctuation.definition.optional-parameter.ocaml</string>
 						</dict>
 					</dict>
-					<key>name</key>
-					<string>variable.parameter.optional.ocaml</string>
 					<key>patterns</key>
 					<array>
 						<dict>
@@ -2105,6 +2099,8 @@
 							<string>punctuation.definition.tuple.ocaml</string>
 						</dict>
 					</dict>
+					<key>comment</key>
+					<string>variable.parameter.tuple.ocaml</string>
 					<key>end</key>
 					<string>(\))</string>
 					<key>endCaptures</key>
@@ -2115,8 +2111,6 @@
 							<string>punctuation.definition.tuple.ocaml</string>
 						</dict>
 					</dict>
-					<key>name</key>
-					<string>variable.parameter.tuple.ocaml</string>
 					<key>patterns</key>
 					<array>
 						<dict>
@@ -2146,6 +2140,8 @@
 							<string>punctuation.definition.record.ocaml</string>
 						</dict>
 					</dict>
+					<key>comment</key>
+					<string>variable.parameter.record.ocaml</string>
 					<key>end</key>
 					<string>(\})</string>
 					<key>endCaptures</key>
@@ -2156,8 +2152,6 @@
 							<string>punctuation.definition.record.ocaml</string>
 						</dict>
 					</dict>
-					<key>name</key>
-					<string>variable.parameter.record.ocaml</string>
 					<key>patterns</key>
 					<array>
 						<dict>
@@ -2172,7 +2166,7 @@
 								<key>1</key>
 								<dict>
 									<key>name</key>
-									<string>entity.name.tag.record.ocaml</string>
+									<string>variable.parameter.record.label.ocaml</string>
 								</dict>
 								<key>2</key>
 								<dict>
@@ -2205,6 +2199,12 @@
 				<dict>
 					<key>include</key>
 					<string>#storagetypes</string>
+				</dict>
+				<dict>
+					<key>match</key>
+					<string>as</string>
+					<key>name</key>
+					<string>keyword.other.ocaml</string>
 				</dict>
 				<dict>
 					<key>match</key>
