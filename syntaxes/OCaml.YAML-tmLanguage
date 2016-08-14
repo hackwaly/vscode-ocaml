@@ -46,24 +46,16 @@ patterns:
   patterns:
   - include: '#variables'
 
-- name: meta.anonymous-function.ocaml
-  begin: (\(|\s)(?=fun\s)
+
+- name: meta.anonymous-function.definition.ocaml
+  begin: (?<=(\(|\s))(fun)\s
   beginCaptures:
-    '1': {name: punctuation.definition.anonymous-function.ocaml}
-  end: (\))
+    '2': {name: keyword.other.function-definition.ocaml}
+  end: (->)
   endCaptures:
-    '1': {name: punctuation.definition.anonymous-function.ocaml}
+    '1': {name: punctuation.separator.function-definition.ocaml}
   patterns:
-  - name: meta.anonymous-function.definition.ocaml
-    begin: (?<=(\(|\s))(fun)\s
-    beginCaptures:
-      '2': {name: keyword.other.function-definition.ocaml}
-    end: (->)
-    endCaptures:
-      '1': {name: punctuation.separator.function-definition.ocaml}
-    patterns:
-    - include: '#variables'
-  - include: $self
+  - include: '#variables'
 
 - name: meta.type-definition-group.ocaml
   begin: ^\s*(?=type\s)
