@@ -683,7 +683,7 @@ repository:
       - name: meta.recordfield.match.ocaml
         begin: \b([a-z][a-zA-Z0-9'_]*)\s*(=)
         beginCaptures:
-          '1': {name: variable.parameter.record.label.ocaml}
+          '1': {name: variable.record.label.ocaml}
           '2': {name: punctuation.separator.record.field-assignment.ocaml}
         end: (;)|(?=\})
         endCaptures:
