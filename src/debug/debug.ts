@@ -254,7 +254,7 @@ class OCamlDebugSession extends DebugSession {
                 this.sendEvent(new OutputEvent(message));
             } else {
                 this._debuggeeProc = child_process.spawn(args.program, args.arguments || [], {
-                    env: { "CAML_DEBUG_SOCKET": this._socket },
+                    env: Object.assign({}, process.env, {"CAML_DEBUG_SOCKET": this._socket }),
                     cwd: args.cd || path.dirname(args.program)
                 });
 
