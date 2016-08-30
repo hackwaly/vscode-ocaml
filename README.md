@@ -55,7 +55,7 @@ clean:
 .PHONY: build clean
 ```
 
-```json
+```js
 // .vscode/tasks.json
 {
     "version": "0.1.0",
@@ -88,7 +88,7 @@ clean:
 }
 ```
 
-```json
+```js
 // .vscode/launch.json
 {
     "version": "0.2.0",
