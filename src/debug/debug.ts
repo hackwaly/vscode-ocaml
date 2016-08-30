@@ -69,7 +69,8 @@ class OCamlDebugSession extends DebugSession {
     private _breakpoints: Map<string, Breakpoint[]>;
     private _functionBreakpoints: Breakpoint[];
     private _variableHandles: Handles<VariableContainer>;
-    private _filenames = [];
+    private _modules: string[] = [];
+    private _filenames: string[] = [];
     private _filenameToPath = new Map<string, string>();
 
     constructor() {
@@ -136,7 +137,13 @@ class OCamlDebugSession extends DebugSession {
     }
 
     getModuleFromFilename(filename) {
-        return path.basename(filename).split(/\./g)[0].replace(/^[a-z]/, (c) => c.toUpperCase());
+        // FIXME: respect `directory` command of ocamldebug
+        let candidate = path.basename(filename).split(/\./g)[0].replace(/^[a-z]/, (c) => c.toUpperCase());
+        let modules = this._modules.filter((module) => {
+            let path = module.split(/\./g);
+            return path[path.length - 1] === candidate;
+        });
+        return modules.length >= 1 ? modules[0] : candidate;
     }
 
     getSource(filename: string) {
@@ -273,8 +280,15 @@ class OCamlDebugSession extends DebugSession {
         };
 
         this.ocdCommand(['goto', 0], () => {
-            this.sendResponse(response);
-            this.sendEvent(new InitializedEvent());
+            this.ocdCommand(['info', 'modules'], (text: string) => {
+                let modules = text
+                    .replace(/^Used modules:/, '')
+                    .replace(/[\s\r\n]+/, ' ')
+                    .trim().split(' ');
+                this._modules = modules;
+                this.sendResponse(response);
+                this.sendEvent(new InitializedEvent());
+            });
         }, (buffer: string) => {
             if (buffer.includes('Waiting for connection...')) {
                 let message = /Waiting for connection\.\.\..*$/m.exec(buffer)[0];
