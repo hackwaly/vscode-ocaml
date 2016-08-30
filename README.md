@@ -36,13 +36,13 @@ This extension contributes the following settings:
 ## Tips
 
 1). In VS Code, `*.ml` is associated to F# by default, You need manually config this in `settings.json` to make OCaml mode work with `*.ml` file.
-```
+```json
 	"files.associations": {
 		"*.ml": "ocaml",
 		"*.mli": "ocaml"
 	}
 ```
-2). You need build with `-bin-annot` flag and set build folder in `.merlin` to get goto definitions works cross files.a
+2). You need build with `-bin-annot` flag and set build folder in `.merlin` to get goto definitions works cross files.
 
 3). Did you know vscode-ocaml works perfect with `.vscode/tasks.json`. Here is an example:
 
