@@ -283,7 +283,7 @@ class OCamlDebugSession extends DebugSession {
             this.ocdCommand(['info', 'modules'], (text: string) => {
                 let modules = text
                     .replace(/^Used modules:/, '')
-                    .replace(/[\s\r\n]+/, ' ')
+                    .replace(/[\s\r\n]+/g, ' ')
                     .trim().split(' ');
                 this._modules = modules;
                 this.sendResponse(response);
