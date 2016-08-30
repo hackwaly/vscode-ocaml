@@ -33,15 +33,81 @@ This extension contributes the following settings:
 * `ocaml.merlinPath`: path to ocamlmerlin.
 * `ocaml.lintDelay`: time to delay lint when make changes.
 
-## Known Issues
+## Tips
 
-In VS Code, `*.ml` is associated to F# by default, You need manually config this to make OCaml mode work with *.ml file.
-
+1). In VS Code, `*.ml` is associated to F# by default, You need manually config this in `settings.json` to make OCaml mode work with `*.ml` file.
 ```
-"files.associations": {
-    "*.ml": "ocaml"
+	"files.associations": {
+		"*.ml": "ocaml",
+		"*.mli": "ocaml"
+	}
+```
+2). You need build with `-bin-annot` flag and set build folder in `.merlin` to get goto definitions works cross files.a
+
+3). Did you know vscode-ocaml works perfect with `.vscode/tasks.json`. Here is an example:
+
+```Makefile
+# Makefile
+build:
+	ocamlbuild -use-ocamlfind main.d.byte
+clean:
+	ocamlbuild -clean
+.PHONY: build clean
+```
+
+```json
+// .vscode/tasks.json
+{
+    "version": "0.1.0",
+    "command": "make",
+    "showOutput": "always",
+    "tasks": [
+        {"taskName": "clean"},
+        {
+            "taskName": "build",
+            "problemMatcher": {
+                "fileLocation": "relative",
+                "owner": "ocaml",
+                "pattern": [
+                    {
+                        "regexp": "^File \"(.*)\", line (\\d+), characters (\\d+)-(\\d+):$",
+                        "file": 1,
+                        "line": 2,
+                        "column": 3,
+                        "endColumn": 4
+                    },
+                    {
+                        "regexp": "^(?:(Error|Warning)(?: \\d+)?): (.*)$",
+                        "severity": 1,
+                        "message": 2
+                    }
+                ]
+            }
+        }
+    ]
 }
 ```
+
+```json
+// .vscode/launch.json
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "OCaml",
+            "type": "ocamldebug",
+            "request": "launch",
+            "program": "${workspaceRoot}/main.d.byte",
+            "stopOnEntry": false,
+            "preLaunchTask": "build" // Build before launch
+        }
+    ]
+}
+```
+
+## Known Issues
+
+See https://github.com/hackwaly/vscode-ocaml/issues?q=is%3Aopen+is%3Aissue+label%3Abug
 
 ## Release Notes
 
