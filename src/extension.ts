@@ -134,7 +134,7 @@ export function activate(context: vscode.ExtensionContext) {
                 await session.syncBuffer(document.fileName, document.getText(), token);
                 if (token.isCancellationRequested) return null;
 
-                let [status, result] = await session.request(['complete', 'prefix', prefix, 'at', fromVsPos(position)]);
+                let [status, result] = await session.request(['complete', 'prefix', prefix, 'at', fromVsPos(position), 'with', 'doc']);
                 if (token.isCancellationRequested) return null;
 
                 if (status !== 'return') return;
