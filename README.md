@@ -69,18 +69,19 @@ clean:
                 "fileLocation": "relative",
                 "owner": "ocaml",
                 "pattern": [
-                    {
-                        "regexp": "^File \"(.*)\", line (\\d+), characters (\\d+)-(\\d+):$",
-                        "file": 1,
-                        "line": 2,
-                        "column": 3,
-                        "endColumn": 4
-                    },
-                    {
-                        "regexp": "^(?:(Error|Warning)(?: \\d+)?): (.*)$",
-                        "severity": 1,
-                        "message": 2
-                    }
+			{
+				"regexp": "^File \"(.*)\", line (\\d+), characters (\\d+)-(\\d+):$",
+				"file": 1,
+				"line": 2,
+				"column": 3,
+				"endColumn": 4
+			},
+			{
+				"regexp": "^(?:(?:Parse\\s+)?(Warning|[Ee]rror)(?:\\s+\\d+)?:)?\\s+(.*)$",
+				"severity": 1,
+				"message": 2,
+				"loop": true
+			}
                 ]
             }
         }
