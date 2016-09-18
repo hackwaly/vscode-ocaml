@@ -114,6 +114,13 @@ See https://github.com/hackwaly/vscode-ocaml/issues?q=is%3Aopen+is%3Aissue+label
 
 ## Release Notes
 
+### 0.6.0
+
+Support launch debug target in Integrated Terminal.
+Add a command to switch between module implementation/signature.
+Support Find references in file.
+[More Info](https://github.com/hackwaly/vscode-ocaml/milestone/3?closed=1)
+
 ### 0.5.0
 
 Support debug variable paging.
