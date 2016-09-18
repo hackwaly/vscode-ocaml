@@ -4,6 +4,11 @@ import * as vscode from 'vscode';
 import {OCamlMerlinSession} from './merlin';
 import * as child_process from 'child_process';
 import * as Path from 'path';
+import * as Fs from 'fs';
+
+let promisify = require('tiny-promisify');
+let fsExists = promisify(Fs.exists);
+let fsWriteFile = promisify(Fs.writeFile);
 
 let getStream = require('get-stream');
 let ocamlLang = { language: 'ocaml' };
@@ -14,7 +19,7 @@ let doOcpIndent = async (code: string, token: vscode.CancellationToken, range?: 
     let args = [];
     if (range) {
         args.push('--lines');
-        args.push(`${range.start.line+1}-${range.end.line+1}`);
+        args.push(`${range.start.line + 1}-${range.end.line + 1}`);
     }
     args.push('--numeric');
     let cp = child_process.spawn(ocpIndentPath, args);
@@ -354,6 +359,32 @@ export function activate(context: vscode.ExtensionContext) {
         })
     );
 
+    context.subscriptions.push(
+        vscode.commands.registerCommand('ocaml.switch_mli_ml', async () => {
+            let editor = vscode.window.activeTextEditor;
+            let doc = editor != null ? editor.document : null;
+            let path = doc != null ? doc.fileName : null;
+            let ext = Path.extname(path || '');
+            let newExt = { '.mli': '.ml', '.ml': '.mli' }[ext];
+            if (!newExt) {
+                await vscode.window.showInformationMessage('Target file must be an OCaml signature or implementation file');
+                return;
+            }
+
+            let newPath = path.substring(0, path.length - ext.length) + newExt;
+            if (!(await fsExists(newPath))) {
+                await fsWriteFile(newPath, '');
+                let name = { '.mli': 'Signature', '.ml': 'Implementation' }[newExt];
+                await vscode.window.showInformationMessage(`${name} file doesn't exist. New file has created for you.`);
+            }
+
+            await vscode.commands.executeCommand(
+                'vscode.open',
+                vscode.Uri.file(newPath)
+            );
+        })
+    );
+
     let provideLinter = async (document: vscode.TextDocument, token) => {
         await session.syncBuffer(document.fileName, document.getText(), token);
         if (token.isCancellationRequested) return null;
@@ -391,7 +422,7 @@ export function activate(context: vscode.ExtensionContext) {
                     if (Path.basename(file) === Path.basename(document.fileName)) {
                         diagnostics.push(
                             new vscode.Diagnostic(
-                                toVsRange({line, col: col1}, {line, col: col2}),
+                                toVsRange({ line, col: col1 }, { line, col: col2 }),
                                 message,
                                 fromType(type.toLowerCase())
                             )
