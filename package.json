@@ -106,6 +106,7 @@
             "type": "ocamldebug",
             "request": "launch",
             "program": "${workspaceRoot}/main.d.byte",
+            "console": "internalConsole",
             "stopOnEntry": false
           }
         ],
@@ -125,6 +126,15 @@
                   "type": "string"
                 },
                 "description": "The list of include directories for ocamldebug."
+              },
+              "console": {
+                "enum": [
+                  "internalConsole",
+                  "integratedTerminal",
+                  "externalTerminal"
+                ],
+                "description": "Where to launch the debug target: internal console, integrated terminal, or external terminal.",
+                "default": "internalConsole"
               },
               "program": {
                 "type": "string",
@@ -207,7 +217,7 @@
     "get-stream": "^2.2.1",
     "iconv-lite": "^0.4.13",
     "tiny-promisify": "^0.1.1",
-    "vscode-debugadapter": "^1.10.0",
-    "vscode-debugprotocol": "^1.10.0"
+    "vscode-debugadapter": "^1.12.0",
+    "vscode-debugprotocol": "^1.12.0"
   }
 }

@@ -24,8 +24,9 @@ let DECODED_STDERR = Symbol();
 
 interface LaunchRequestArguments {
     cd: string;
-    includePath?: string[]; 
+    includePath?: string[];
     program: string;
+    console: "internalConsole" | "integratedTerminal" | "externalTerminal",
     arguments?: string[];
     stopOnEntry: boolean;
     socket?: string;
@@ -61,6 +62,7 @@ export class Expander implements VariableContainer {
 class OCamlDebugSession extends DebugSession {
     private static BREAKPOINT_ID = Symbol();
     private _launchArgs: LaunchRequestArguments;
+    private _supportRunInTerminal: boolean = false;
     private _debuggeeProc: child_process.ChildProcess;
     private _debuggerProc: child_process.ChildProcess;
     private _wait = Promise.resolve();
@@ -170,6 +172,7 @@ class OCamlDebugSession extends DebugSession {
         response.body.supportsFunctionBreakpoints = true;
         response.body.supportsEvaluateForHovers = true;
         response.body.supportsStepBack = true;
+        this._supportRunInTerminal = args.supportsRunInTerminalRequest;
         this.sendResponse(response);
     }
 
@@ -252,16 +255,24 @@ class OCamlDebugSession extends DebugSession {
         this._wait = this.readUntilPrompt().then(() => { });
         this.ocdCommand(['set', 'loadingmode', 'manual'], () => { });
 
-        let once = false;
-        let onceSocketListened = (message: string) => {
-            if (once) return;
-            once = true;
-
-            if (this._remoteMode) {
-                this.sendEvent(new OutputEvent(message));
+        let launchDebuggee = () => {
+            if (this._supportRunInTerminal && args.console === 'integratedTerminal' || args.console === 'externalTerminal') {
+                this.runInTerminalRequest({
+                    title: 'OCaml Debug Console',
+                    kind: args.console === 'integratedTerminal' ? 'integrated' : 'external',
+                    env: { "CAML_DEBUG_SOCKET": this._socket },
+                    cwd: args.cd || path.dirname(args.program),
+                    args: [args.program, ...(args.arguments || [])]
+                }, 5000, (runResp) => {
+                    if (!runResp.success) {
+                        // TOOD: Use sendErrorResponse instead.
+                        this.sendEvent(new OutputEvent(runResp.message));
+                        this.sendEvent(new TerminatedEvent());
+                    }
+                });
             } else {
                 this._debuggeeProc = child_process.spawn(args.program, args.arguments || [], {
-                    env: Object.assign({}, process.env, {"CAML_DEBUG_SOCKET": this._socket }),
+                    env: Object.assign({}, process.env, { "CAML_DEBUG_SOCKET": this._socket }),
                     cwd: args.cd || path.dirname(args.program)
                 });
 
@@ -276,6 +287,18 @@ class OCamlDebugSession extends DebugSession {
                 this._debuggeeProc[DECODED_STDERR].on('data', (chunk) => {
                     this.sendEvent(new OutputEvent(chunk, 'stderr'));
                 });
+            }
+        };
+
+        let once = false;
+        let onceSocketListened = (message: string) => {
+            if (once) return;
+            once = true;
+
+            if (this._remoteMode) {
+                this.sendEvent(new OutputEvent(message));
+            } else {
+                launchDebuggee();
             }
         };
 
@@ -484,7 +507,7 @@ class OCamlDebugSession extends DebugSession {
                     case 'con':
                         return [createVariable('%arguments', value.args)];
                     case 'tuple':
-                        return value.items.map((item, index) => createVariable(`%${index+1}`, item));
+                        return value.items.map((item, index) => createVariable(`%${index + 1}`, item));
                     case 'array':
                     case 'list':
                         return value.items.map((item, index) => createVariable(`${index}`, item));
@@ -498,7 +521,7 @@ class OCamlDebugSession extends DebugSession {
             let text = repr(value);
             let numIndexed;
             let numNamed;
-            
+
             switch (value.kind) {
                 case 'plain':
                     return new Variable(name, text);
@@ -542,8 +565,8 @@ class OCamlDebugSession extends DebugSession {
         }
     }
 
-	protected async variablesRequest(response: DebugProtocol.VariablesResponse, args: DebugProtocol.VariablesArguments) {
-		let reference = args.variablesReference;
+    protected async variablesRequest(response: DebugProtocol.VariablesResponse, args: DebugProtocol.VariablesArguments) {
+        let reference = args.variablesReference;
         let variablesContainer = this._variableHandles.get(reference);
         let variables = [];
 
@@ -552,7 +575,7 @@ class OCamlDebugSession extends DebugSession {
                 variables = await variablesContainer.expand(this);
             } catch (ex) { }
         }
-        
+
         let filteredVariables = variables;
         if (args.filter === 'named') {
             filteredVariables = variables.filter((variable) => !/^[0-9]+$/.test(variable.name));
@@ -571,8 +594,8 @@ class OCamlDebugSession extends DebugSession {
         }
 
         response.body = { variables: filteredVariables };
-		this.sendResponse(response);
-	}
+        this.sendResponse(response);
+    }
 
     protected evaluateRequest(response: DebugProtocol.EvaluateResponse, args: DebugProtocol.EvaluateArguments) {
         this.ocdCommand(['frame', args.frameId], () => {
