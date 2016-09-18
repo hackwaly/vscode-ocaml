@@ -336,6 +336,24 @@ export function activate(context: vscode.ExtensionContext) {
         })
     );
 
+    context.subscriptions.push(
+        vscode.languages.registerReferenceProvider(ocamlLang, {
+            async provideReferences(document, position, context, token) {
+                await session.syncBuffer(document.fileName, document.getText(), token);
+                if (token.isCancellationRequested) return null;
+
+                let [status, result] = await session.request(['occurrences', 'ident', 'at', fromVsPos(position)]);
+                if (token.isCancellationRequested) return null;
+
+                if (status !== 'return' || result.length <= 0) return;
+
+                return result.map((item) => {
+                    return new vscode.Location(document.uri, toVsRange(item.start, item.end));
+                });
+            }
+        })
+    );
+
     let provideLinter = async (document: vscode.TextDocument, token) => {
         await session.syncBuffer(document.fileName, document.getText(), token);
         if (token.isCancellationRequested) return null;
@@ -369,7 +387,7 @@ export function activate(context: vscode.ExtensionContext) {
                     let line = JSON.parse(match[2]);
                     let col1 = JSON.parse(match[3]);
                     let col2 = JSON.parse(match[4]);
-                    
+
                     if (Path.basename(file) === Path.basename(document.fileName)) {
                         diagnostics.push(
                             new vscode.Diagnostic(
