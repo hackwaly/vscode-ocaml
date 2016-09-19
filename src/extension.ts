@@ -7,7 +7,9 @@ import * as Path from 'path';
 import * as Fs from 'fs';
 
 let promisify = require('tiny-promisify');
-let fsExists = promisify(Fs.exists);
+let fsExists = (path: string) => new Promise((resolve) => {
+    Fs.exists(path, resolve);
+});
 let fsWriteFile = promisify(Fs.writeFile);
 
 let getStream = require('get-stream');
