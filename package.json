@@ -7,7 +7,7 @@
   "publisher": "hackwaly",
   "icon": "images/colour-icon.svg",
   "engines": {
-    "vscode": "^1.0.0"
+    "vscode": "^1.5.0"
   },
   "categories": [
     "Languages",
@@ -59,9 +59,14 @@
     ],
     "commands": [
       {
-        "category": "Ocaml",
+        "category": "OCaml",
         "command": "ocaml.switch_mli_ml",
         "title": "Switch Signature/Implementation"
+      },
+      {
+        "category": "OCaml",
+        "command": "ocaml.utop",
+        "title": "New UTop Session"
       }
     ],
     "grammars": [

@@ -387,6 +387,14 @@ export function activate(context: vscode.ExtensionContext) {
         })
     );
 
+    context.subscriptions.push(
+        vscode.commands.registerCommand('ocaml.utop', async () => {
+            let utopTerm = vscode.window.createTerminal('OCaml UTop');
+            utopTerm.sendText('utop', true);
+            utopTerm.show();
+        })
+    );
+
     let provideLinter = async (document: vscode.TextDocument, token) => {
         await session.syncBuffer(document.fileName, document.getText(), token);
         if (token.isCancellationRequested) return null;
