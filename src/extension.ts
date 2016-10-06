@@ -387,10 +387,28 @@ export function activate(context: vscode.ExtensionContext) {
         })
     );
 
+
+    let utopTerm: vscode.Terminal;
     context.subscriptions.push(
         vscode.commands.registerCommand('ocaml.utop', async () => {
-            let utopTerm = vscode.window.createTerminal('OCaml UTop');
+            if (utopTerm) {
+                utopTerm.dispose();
+            }
+            utopTerm = vscode.window.createTerminal('OCaml UTop');
             utopTerm.sendText('utop', true);
+            utopTerm.show();
+        })
+    );
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('ocaml.utop_send', async () => {
+            if (!utopTerm) return;
+
+            let editor = vscode.window.activeTextEditor;
+            if (!editor) return;
+
+            let selection = editor.document.getText(editor.selection);
+            utopTerm.sendText(selection);
             utopTerm.show();
         })
     );

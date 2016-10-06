@@ -67,6 +67,11 @@
         "category": "OCaml",
         "command": "ocaml.utop",
         "title": "New UTop Session"
+      },
+      {
+        "category": "OCaml",
+        "command": "ocaml.utop_send",
+        "title": "Send Selection To UTop Session"
       }
     ],
     "grammars": [
