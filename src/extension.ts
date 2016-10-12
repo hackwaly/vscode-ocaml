@@ -387,6 +387,43 @@ export function activate(context: vscode.ExtensionContext) {
         })
     );
 
+
+    let utopTerm: vscode.Terminal;
+    context.subscriptions.push(
+        vscode.window.onDidCloseTerminal((term) => {
+            if (term === utopTerm) {
+                utopTerm = null;
+            }
+        })
+    );
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('ocaml.utop', async () => {
+            if (utopTerm) {
+                utopTerm.dispose();
+            }
+            utopTerm = vscode.window.createTerminal('OCaml UTop');
+            utopTerm.sendText('utop', true);
+            utopTerm.show();
+        })
+    );
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('ocaml.utop_send', async () => {
+            if (!utopTerm) {
+                utopTerm = vscode.window.createTerminal('OCaml UTop');
+                utopTerm.sendText('utop', true);
+            }
+            utopTerm.show();
+
+            let editor = vscode.window.activeTextEditor;
+            if (!editor) return;
+
+            let selection = editor.document.getText(editor.selection);
+            utopTerm.sendText(selection);
+        })
+    );
+
     let provideLinter = async (document: vscode.TextDocument, token) => {
         await session.syncBuffer(document.fileName, document.getText(), token);
         if (token.isCancellationRequested) return null;
