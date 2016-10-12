@@ -13,6 +13,7 @@ This is an VS Code extension that provides OCaml language support.
 * Peek and goto definition (also provide a symbol list). _powered by ocamlmerlin_
 * Auto indent on your type. _powered by ocp-indent_
 * Debugger integrated. _powered by ocamldebug_
+* UTop integrated. _since v0.6.2_
 
 ![features](http://i.giphy.com/26BRsQmMAHdg1LNRe.gif)
 
@@ -119,6 +120,7 @@ See https://github.com/hackwaly/vscode-ocaml/issues?q=is%3Aopen+is%3Aissue+label
 Support launch debug target in Integrated Terminal.
 Add a command to switch between module implementation/signature.
 Support Find references in file.
+UTop integrated.
 [More Info](https://github.com/hackwaly/vscode-ocaml/milestone/3?closed=1)
 
 ### 0.5.0
