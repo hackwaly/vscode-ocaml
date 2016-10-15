@@ -3,7 +3,7 @@
   "name": "ocaml",
   "displayName": "OCaml",
   "description": "Rich OCaml language support for Visual Studio Code",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "publisher": "hackwaly",
   "icon": "images/colour-icon.svg",
   "engines": {
@@ -200,15 +200,28 @@
       "properties": {
         "ocaml.ocpIndentPath": {
           "type": "string",
-          "default": "ocp-indent"
+          "default": "ocp-indent",
+          "description": "Path to ocp-indent."
         },
         "ocaml.merlinPath": {
           "type": "string",
-          "default": "ocamlmerlin"
+          "default": "ocamlmerlin",
+          "description": "Path to ocamlmerlin."
         },
         "ocaml.lintDelay": {
           "type": "number",
-          "default": 500
+          "default": 500,
+          "description": "Time to delay lint when make changes."
+        },
+        "ocaml.utopFocus": {
+          "type": "boolean",
+          "default": false,
+          "description": "Focus UTop terminal after send selection."
+        },
+        "ocaml.utopNewline": {
+          "type": "boolean",
+          "default": true,
+          "description": "Append newline when send selection to UTop."
         }
       }
     }

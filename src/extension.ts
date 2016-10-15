@@ -11,6 +11,9 @@ let fsExists = (path: string) => new Promise((resolve) => {
     Fs.exists(path, resolve);
 });
 let fsWriteFile = promisify(Fs.writeFile);
+let sleep = (duration) => new Promise((resolve) => {
+    setTimeout(resolve, duration);
+});
 
 let getStream = require('get-stream');
 let ocamlLang = { language: 'ocaml' };
@@ -413,14 +416,16 @@ export function activate(context: vscode.ExtensionContext) {
             if (!utopTerm) {
                 utopTerm = vscode.window.createTerminal('OCaml UTop');
                 utopTerm.sendText('utop', true);
+                // FIXME: Sleep 500ms to wait for utop initialized.
+                await sleep(500);
             }
-            utopTerm.show();
+            utopTerm.show(!configuration.get<boolean>('ocaml.utopFocus', false));
 
             let editor = vscode.window.activeTextEditor;
             if (!editor) return;
 
             let selection = editor.document.getText(editor.selection);
-            utopTerm.sendText(selection);
+            utopTerm.sendText(selection, configuration.get<boolean>('ocaml.utopNewline', true));
         })
     );
 
