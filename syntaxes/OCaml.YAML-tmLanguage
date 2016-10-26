@@ -268,7 +268,7 @@ patterns:
 - include: '#arrays'
 
 - name: meta.type-constraint.ocaml
-  begin: (\()(?=(~[a-z][a-zA-Z0-9_]*:|("(\\"|[^"])*")|[^\(\)~"])+(?<!:)(:>|:(?![:=])))
+  begin: (\()(?=(~[a-z][a-zA-Z0-9_]*:|("(\\"|[^\\"])*")|[^\(\)~"])+(?<!:)(:>|:(?![:=])))
   beginCaptures:
     '1': {name: punctuation.section.type-constraint.ocaml}
   end: (?<!:)(:>|:(?![:=]))(.*?)(\))
@@ -636,7 +636,7 @@ repository:
       patterns:
       - include: $self
     - name: meta.parameter.type-constrained.ocaml
-      begin: (\()(?=(~[a-z][a-zA-Z0-9_]*:|("(\\"|[^"])*")|[^\(\)~"])+(?<!:)(:>|:(?![:=])))
+      begin: (\()(?=(~[a-z][a-zA-Z0-9_]*:|("(\\"|[^\\"])*")|[^\(\)~"])+(?<!:)(:>|:(?![:=])))
       beginCaptures:
         '1': {name: punctuation.section.type-constraint.ocaml}
       end: (\))

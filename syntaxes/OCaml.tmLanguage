@@ -899,7 +899,7 @@
 		</dict>
 		<dict>
 			<key>begin</key>
-			<string>(\()(?=(~[a-z][a-zA-Z0-9_]*:|("(\\"|[^"])*")|[^\(\)~"])+(?&lt;!:)(:&gt;|:(?![:=])))</string>
+			<string>(\()(?=(~[a-z][a-zA-Z0-9_]*:|("(\\"|[^\\"])*")|[^\(\)~"])+(?&lt;!:)(:&gt;|:(?![:=])))</string>
 			<key>beginCaptures</key>
 			<dict>
 				<key>1</key>
@@ -2013,7 +2013,7 @@
 				</dict>
 				<dict>
 					<key>begin</key>
-					<string>(\()(?=(~[a-z][a-zA-Z0-9_]*:|("(\\"|[^"])*")|[^\(\)~"])+(?&lt;!:)(:&gt;|:(?![:=])))</string>
+					<string>(\()(?=(~[a-z][a-zA-Z0-9_]*:|("(\\"|[^\\"])*")|[^\(\)~"])+(?&lt;!:)(:&gt;|:(?![:=])))</string>
 					<key>beginCaptures</key>
 					<dict>
 						<key>1</key>
