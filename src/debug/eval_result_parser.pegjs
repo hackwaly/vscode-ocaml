@@ -10,7 +10,7 @@ function fixList1(head, tail) {
 }
 
 msg = name:id ':' _ type:type '=' _ value:value { return {name: name, type: type.trim(), value: value}; }
-id = $([A-Za-z_'][A-Za-z_'.0-9]*)
+id = $([A-Za-z_'`][A-Za-z_'.0-9]*)
 type = $([^=]+)
 value = tuple
 tuple = head:primary tail:(_ ',' _ primary)* { var items = fixList1(head, tail); return items.length === 1 ? items[0] : {kind: 'tuple', items: items}; }
