@@ -243,6 +243,10 @@ class OCamlDebugSession extends DebugSession {
         let debuggeeEncoding = checkEncoding('encoding', args.encoding);
 
         this._debuggerProc = child_process.spawn('ocamldebug', ocdArgs);
+        this._debuggerProc.on('exit', () => {
+            this.sendEvent(new TerminatedEvent());
+        });
+
         this._debuggerProc[DECODED_STDOUT] = iconv.decodeStream(debuggerEncoding);
         this._debuggerProc.stdout.pipe(this._debuggerProc[DECODED_STDOUT]);
         this._debuggerProc[DECODED_STDERR] = iconv.decodeStream(debuggerEncoding);
