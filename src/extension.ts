@@ -464,13 +464,13 @@ export function activate(context: vscode.ExtensionContext) {
                     let col2 = JSON.parse(match[4]);
 
                     if (Path.basename(file) === Path.basename(document.fileName)) {
-                        diagnostics.push(
-                            new vscode.Diagnostic(
-                                toVsRange({ line, col: col1 }, { line, col: col2 }),
-                                message,
-                                fromType(type.toLowerCase())
-                            )
+                        let diag = new vscode.Diagnostic(
+                            toVsRange({ line, col: col1 }, { line, col: col2 }),
+                            message,
+                            fromType(type.toLowerCase())
                         );
+                        diag.source = 'merlin';
+                        diagnostics.push(diag);
                     } else {
                         // Log here?
                     }
@@ -478,13 +478,13 @@ export function activate(context: vscode.ExtensionContext) {
                 return;
             }
 
-            diagnostics.push(
-                new vscode.Diagnostic(
-                    toVsRange(start, end),
-                    message,
-                    fromType(type.toLowerCase())
-                )
+            let diag = new vscode.Diagnostic(
+                toVsRange(start, end),
+                message,
+                fromType(type.toLowerCase())
             );
+            diag.source = 'merlin';
+            diagnostics.push(diag);
         });
 
         return diagnostics;
@@ -492,8 +492,9 @@ export function activate(context: vscode.ExtensionContext) {
 
     let LINTER_DEBOUNCE_TIMER = Symbol();
     let LINTER_TOKEN_SOURCE = Symbol();
+    let LINTER_CLEAR_LISTENER = Symbol();
 
-    let diagnosticCollection = vscode.languages.createDiagnosticCollection('ocaml');
+    let diagnosticCollection = vscode.languages.createDiagnosticCollection('merlin');
 
     let lintDocument = (document: vscode.TextDocument) => {
         if (document.languageId !== 'ocaml') return;
@@ -528,6 +529,12 @@ export function activate(context: vscode.ExtensionContext) {
         let path = Path.basename(document.fileName);
         if (path === '.merlin') {
             relintOpenedDocuments();
+        }
+    });
+
+    vscode.workspace.onDidCloseTextDocument((document) => {
+        if (document.languageId === 'ocaml') {
+            diagnosticCollection.delete(document.uri);
         }
     });
 }
