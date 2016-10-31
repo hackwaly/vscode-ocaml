@@ -30,9 +30,11 @@ opam install ocp-indent
 
 This extension contributes the following settings:
 
-* `ocaml.ocpIndentPath`: path to ocp-indent.
-* `ocaml.merlinPath`: path to ocamlmerlin.
-* `ocaml.lintDelay`: time to delay lint when make changes.
+* `ocaml.ocpIndentPath`: Path to ocp-indent.
+* `ocaml.merlinPath`: Path to ocamlmerlin.
+* `ocaml.lintDelay`: Time to delay lint when made changes.
+* `ocaml.lintOnChange`: Do lint when made changes.
+* `ocaml.lintOnSave`: Do lint when save document.
 
 ## Tips
 
