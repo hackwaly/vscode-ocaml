@@ -521,7 +521,15 @@ export function activate(context: vscode.ExtensionContext) {
         }, configuration.get<number>('lintDelay'));
     };
 
+    vscode.workspace.onDidSaveTextDocument(async (document) => {
+        if (!configuration.get<boolean>('lintOnSave')) return;
+        let diagnostics = await provideLinter(document, new vscode.CancellationTokenSource().token);
+        diagnosticCollection.set(document.uri, diagnostics);
+    });
+
     vscode.workspace.onDidChangeTextDocument(({document}) => {
+        if (!configuration.get<boolean>('lintOnChange')) return;
+
         if (document.languageId === 'ocaml') {
             lintDocument(document);
             return;
