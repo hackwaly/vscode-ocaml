@@ -139,7 +139,8 @@ export function activate(context: vscode.ExtensionContext) {
                     new vscode.Position(position.line, 0),
                     position
                 ));
-                let prefix = /[A-Za-z_][A-Za-z_'0-9]*(?:\.[A-Za-z_][A-Za-z_'0-9]*)*\.?$/.exec(line)[0];
+                let match = /(?:[A-Za-z_][A-Za-z_'0-9]*(?:[.][A-Za-z_][A-Za-z_'0-9]*)*[.]?|#(?:[A-Za-z_][A-Za-z_'0-9]*)?)$/.exec(line);
+                let prefix = match && match[0] || '';
 
                 await session.syncBuffer(document.fileName, document.getText(), token);
                 if (token.isCancellationRequested) return null;
@@ -170,10 +171,19 @@ export function activate(context: vscode.ExtensionContext) {
                     completionItem.kind = toVsKind(kind);
                     completionItem.detail = desc;
                     completionItem.documentation = info;
+                    if (prefix.startsWith('#') && name.startsWith(prefix)) {
+                        completionItem.textEdit = new vscode.TextEdit(
+                            new vscode.Range(
+                                new vscode.Position(position.line, position.character - prefix.length),
+                                position
+                            ),
+                            name
+                        );
+                    }
                     return completionItem;
                 }));
             }
-        }, '.'));
+        }, '.', '#'));
 
     context.subscriptions.push(
         vscode.languages.registerDefinitionProvider(ocamlLang, {
