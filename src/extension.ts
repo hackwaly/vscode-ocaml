@@ -139,7 +139,7 @@ export function activate(context: vscode.ExtensionContext) {
                     new vscode.Position(position.line, 0),
                     position
                 ));
-                let match = /(?:[A-Za-z_][A-Za-z_'0-9]*(?:[.][A-Za-z_][A-Za-z_'0-9]*)*[.]?|#(?:[A-Za-z_][A-Za-z_'0-9]*)?)$/.exec(line);
+                let match = /(?:[~?]?[A-Za-z_0-9'`.]+)$/.exec(line);
                 let prefix = match && match[0] || '';
 
                 await session.syncBuffer(document.fileName, document.getText(), token);
