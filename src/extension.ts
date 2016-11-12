@@ -19,7 +19,8 @@ let getStream = require('get-stream');
 let ocamlLang = { language: 'ocaml' };
 let configuration = vscode.workspace.getConfiguration("ocaml");
 
-let doOcpIndent = async (code: string, token: vscode.CancellationToken, range?: vscode.Range) => {
+let doOcpIndent = async (document: vscode.TextDocument, token: vscode.CancellationToken, range?: vscode.Range) => {
+    let code = document.getText();
     let ocpIndentPath = configuration.get<string>('ocpIndentPath');
     let args = [];
     if (range) {
@@ -27,7 +28,9 @@ let doOcpIndent = async (code: string, token: vscode.CancellationToken, range?: 
         args.push(`${range.start.line + 1}-${range.end.line + 1}`);
     }
     args.push('--numeric');
-    let cp = child_process.spawn(ocpIndentPath, args);
+    let cp = child_process.spawn(ocpIndentPath, args, {
+        cwd: Path.dirname(document.fileName)
+    });
 
     token.onCancellationRequested(() => {
         cp.disconnect();
@@ -92,7 +95,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.languages.registerDocumentFormattingEditProvider(ocamlLang, {
             provideDocumentFormattingEdits(document, options, token) {
-                return doOcpIndent(document.getText(), token);
+                return doOcpIndent(document, token);
             }
         })
     );
@@ -100,7 +103,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.languages.registerDocumentRangeFormattingEditProvider(ocamlLang, {
             provideDocumentRangeFormattingEdits(document, range, options, token) {
-                return doOcpIndent(document.getText(), token, range);
+                return doOcpIndent(document, token, range);
             }
         })
     );
@@ -115,7 +118,7 @@ export function activate(context: vscode.ExtensionContext) {
                 if ((ch === 'd' && !isEndAt('end')) || (ch === 'e' && !isEndAt('done'))) {
                     return [];
                 }
-                return doOcpIndent(document.getText(), token);
+                return doOcpIndent(document, token);
             }
         }, ';', '|', ')', ']', '}', 'd', 'e')
     );
