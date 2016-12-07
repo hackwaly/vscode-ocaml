@@ -18,6 +18,8 @@ export class OCamlMerlinSession {
         this._cp.on('exit', (code, signal) => {
             log(`OCamlmerlin exited with code ${code}, signal ${signal}`);
         });
+        this._cp.stdout.setEncoding("ascii");
+        this._cp.stdin.setDefaultEncoding("ascii");
 
         this._rl = readline.createInterface({
             input: this._cp.stdout,
@@ -36,6 +38,8 @@ export class OCamlMerlinSession {
         let promise = this._wait.then(() => {
             return new Promise((resolve, reject) => {
                 let cmd = JSON.stringify(data);
+                cmd = cmd.replace(/[\u0100-\uffff]/g, 
+                    c => '\\u' + ('0000'+c.charCodeAt(0).toString(16)).slice(-4));
                 log(`command to merlin: ${cmd}`);
                 this._rl.question(cmd + '\n', (answer) => {
                     log(`response from merlin: ${answer}`);
