@@ -633,7 +633,7 @@ class OCamlDebugSession extends DebugSession {
 
                 let content = lines.map((line) => {
                     // FIXME: make sure do not accidently replace "<|a|>" in a string or comment.
-                    return line.replace(/^\d+ /, '').replace(/<\|[ab]\|>/, '$1');
+                    return line.replace(/^\d+ /, '').replace(/<\|[ab]\|>/, '');
                 }).join('\n');
 
                 resolve(content);
