@@ -442,6 +442,12 @@ export function activate(context: vscode.ExtensionContext) {
         })
     );
 
+    context.subscriptions.push(
+        vscode.commands.registerCommand('ocaml.restart_merlin', async () => {
+            session.restart();
+        })
+    );
+
     let provideLinter = async (document: vscode.TextDocument, token) => {
         await session.syncBuffer(document.fileName, document.getText(), token);
         if (token.isCancellationRequested) return null;

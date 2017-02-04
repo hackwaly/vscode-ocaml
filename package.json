@@ -3,7 +3,7 @@
   "name": "ocaml",
   "displayName": "OCaml",
   "description": "Rich OCaml language support for Visual Studio Code",
-  "version": "0.6.11",
+  "version": "0.6.12",
   "publisher": "hackwaly",
   "icon": "images/colour-icon.svg",
   "engines": {
@@ -16,6 +16,9 @@
   ],
   "activationEvents": [
     "onCommand:ocaml.switch_mli_ml",
+    "onCommand:ocaml.utop",
+    "onCommand:ocaml.utop_send",
+    "onCommand:ocaml.restart_merlin",
     "onLanguage:ocaml",
     "onLanguage:ocamllex",
     "onLanguage:menhir"
@@ -72,6 +75,11 @@
         "category": "OCaml",
         "command": "ocaml.utop_send",
         "title": "Send Selection to UTop Session"
+      },
+      {
+        "category": "OCaml",
+        "command": "ocaml.restart_merlin",
+        "title": "Restart Merlin Session"
       }
     ],
     "grammars": [

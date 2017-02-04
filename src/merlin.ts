@@ -5,13 +5,31 @@ import * as child_process from 'child_process';
 import * as readline from 'readline';
 import {log} from './utils';
 
+const noop = () => {};
+
 export class OCamlMerlinSession {
     private _cp: child_process.ChildProcess;
     private _rl: readline.ReadLine;
     private _wait = Promise.resolve();
+    private _rejectWait = noop;
     private _protocolVersion: number = 1;
 
     constructor() {
+        this.restart();
+    }
+
+    restart() {
+        this._rejectWait();
+        this._wait = Promise.resolve();
+        if (this._rl) {
+            this._rl.close();
+            this._rl = null;
+        }
+        if (this._cp) {
+            this._cp.kill();
+            this._cp = null;
+        }
+
         let merlinPath = vscode.workspace.getConfiguration('ocaml').get<string>('merlinPath');
 
         this._cp = child_process.spawn(merlinPath, []);
@@ -45,9 +63,15 @@ export class OCamlMerlinSession {
                     log(`response from merlin: ${answer}`);
                     resolve(JSON.parse(answer));
                 });
+                this._rejectWait = reject;
             });
         });
-        this._wait = promise.then(() => { });
+        this._wait = promise.then(() => { 
+            this._rejectWait = noop;
+        }, (err) => {
+            console.error(err);
+            this._rejectWait = noop;
+        });
         return promise;
     }
 
@@ -67,6 +91,6 @@ export class OCamlMerlinSession {
 
     dispose() {
         this._rl.close();
-        this._cp.disconnect();
+        this._cp.kill();
     }
 }
