@@ -440,6 +440,28 @@ export function activate(context: vscode.ExtensionContext) {
         })
     );
 
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('ocaml.repl_send_stmt', async () => {
+            if (!replTerm) {
+                replTerm = vscode.window.createTerminal('OCaml REPL', configuration.get<string>('replPath', 'ocaml'));
+                // FIXME: Sleep 500ms to wait for repl initialized.
+                await sleep(500);
+            }
+            replTerm.show(!configuration.get<boolean>('replFocus', false));
+
+            let editor = vscode.window.activeTextEditor;
+            if (!editor) return;
+
+            let selection = editor.document.getText(editor.selection);
+            if (!/;;\s*$/.test(selection)) {
+                selection += ';;';
+            }
+            replTerm.sendText(selection, configuration.get<boolean>('replNewline', true));
+        })
+    );
+
+
     context.subscriptions.push(
         vscode.commands.registerCommand('ocaml.restart_merlin', async () => {
             session.restart();

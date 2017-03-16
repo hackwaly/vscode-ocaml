@@ -3,7 +3,7 @@
   "name": "ocaml",
   "displayName": "OCaml",
   "description": "Rich OCaml language support for Visual Studio Code",
-  "version": "0.6.13",
+  "version": "0.6.14",
   "publisher": "hackwaly",
   "icon": "images/colour-icon.svg",
   "engines": {
@@ -75,6 +75,11 @@
         "category": "OCaml",
         "command": "ocaml.repl_send",
         "title": "Send Selection to REPL Session"
+      },
+      {
+        "category": "OCaml",
+        "command": "ocaml.repl_send_stmt",
+        "title": "Send Selection as Statement to REPL Session"
       },
       {
         "category": "OCaml",
