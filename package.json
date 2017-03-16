@@ -16,8 +16,8 @@
   ],
   "activationEvents": [
     "onCommand:ocaml.switch_mli_ml",
-    "onCommand:ocaml.utop",
-    "onCommand:ocaml.utop_send",
+    "onCommand:ocaml.repl",
+    "onCommand:ocaml.repl_send",
     "onCommand:ocaml.restart_merlin",
     "onLanguage:ocaml",
     "onLanguage:ocamllex",
@@ -68,13 +68,13 @@
       },
       {
         "category": "OCaml",
-        "command": "ocaml.utop",
-        "title": "New UTop Session"
+        "command": "ocaml.repl",
+        "title": "New REPL Session"
       },
       {
         "category": "OCaml",
-        "command": "ocaml.utop_send",
-        "title": "Send Selection to UTop Session"
+        "command": "ocaml.repl_send",
+        "title": "Send Selection to REPL Session"
       },
       {
         "category": "OCaml",
@@ -231,15 +231,21 @@
           "default": 500,
           "description": "Time to delay lint when made changes."
         },
-        "ocaml.utopFocus": {
+        "ocaml.replPath": {
+          "type": "string",
+          "enum": ["ocaml", "utop"],
+          "default": "ocaml",
+          "description": "Path to OCaml REPL."
+        },
+        "ocaml.replFocus": {
           "type": "boolean",
           "default": false,
-          "description": "Focus UTop terminal after send selection."
+          "description": "Focus REPL terminal after send selection."
         },
-        "ocaml.utopNewline": {
+        "ocaml.replNewline": {
           "type": "boolean",
           "default": true,
-          "description": "Append newline when send selection to UTop."
+          "description": "Append newline when send selection to REPL."
         }
       }
     }

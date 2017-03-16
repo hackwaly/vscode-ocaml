@@ -404,41 +404,39 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
 
-    let utopTerm: vscode.Terminal;
+    let replTerm: vscode.Terminal;
     context.subscriptions.push(
         vscode.window.onDidCloseTerminal((term) => {
-            if (term === utopTerm) {
-                utopTerm = null;
+            if (term === replTerm) {
+                replTerm = null;
             }
         })
     );
 
     context.subscriptions.push(
-        vscode.commands.registerCommand('ocaml.utop', async () => {
-            if (utopTerm) {
-                utopTerm.dispose();
+        vscode.commands.registerCommand('ocaml.repl', async () => {
+            if (replTerm) {
+                replTerm.dispose();
             }
-            utopTerm = vscode.window.createTerminal('OCaml UTop');
-            utopTerm.sendText('utop', true);
-            utopTerm.show();
+            replTerm = vscode.window.createTerminal('OCaml REPL', configuration.get<string>('replPath', 'ocaml'));
+            replTerm.show();
         })
     );
 
     context.subscriptions.push(
-        vscode.commands.registerCommand('ocaml.utop_send', async () => {
-            if (!utopTerm) {
-                utopTerm = vscode.window.createTerminal('OCaml UTop');
-                utopTerm.sendText('utop', true);
-                // FIXME: Sleep 500ms to wait for utop initialized.
+        vscode.commands.registerCommand('ocaml.repl_send', async () => {
+            if (!replTerm) {
+                replTerm = vscode.window.createTerminal('OCaml REPL', configuration.get<string>('replPath', 'ocaml'));
+                // FIXME: Sleep 500ms to wait for repl initialized.
                 await sleep(500);
             }
-            utopTerm.show(!configuration.get<boolean>('ocaml.utopFocus', false));
+            replTerm.show(!configuration.get<boolean>('replFocus', false));
 
             let editor = vscode.window.activeTextEditor;
             if (!editor) return;
 
             let selection = editor.document.getText(editor.selection);
-            utopTerm.sendText(selection, configuration.get<boolean>('ocaml.utopNewline', true));
+            replTerm.sendText(selection, configuration.get<boolean>('replNewline', true));
         })
     );
 
