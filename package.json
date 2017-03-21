@@ -3,7 +3,7 @@
   "name": "ocaml",
   "displayName": "OCaml",
   "description": "Rich OCaml language support for Visual Studio Code",
-  "version": "0.6.14",
+  "version": "0.6.15",
   "publisher": "hackwaly",
   "icon": "images/colour-icon.svg",
   "engines": {
@@ -236,11 +236,15 @@
           "default": 500,
           "description": "Time to delay lint when made changes."
         },
-        "ocaml.replPath": {
+        "ocaml.replPath.windows": {
           "type": "string",
-          "enum": ["ocaml", "utop"],
+          "default": "ocaml.exe",
+          "description": "Path to OCaml REPL on Windows OS."
+        },
+        "ocaml.replPath.unix": {
+          "type": "string",
           "default": "ocaml",
-          "description": "Path to OCaml REPL."
+          "description": "Path to OCaml REPL on Unix-like OS."
         },
         "ocaml.replFocus": {
           "type": "boolean",

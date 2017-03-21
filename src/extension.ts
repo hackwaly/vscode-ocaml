@@ -417,19 +417,16 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.commands.registerCommand('ocaml.repl', async () => {
             if (replTerm) {
                 replTerm.dispose();
+                replTerm = null;
             }
-            replTerm = vscode.window.createTerminal('OCaml REPL', configuration.get<string>('replPath', 'ocaml'));
+            checkREPL();
             replTerm.show();
         })
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('ocaml.repl_send', async () => {
-            if (!replTerm) {
-                replTerm = vscode.window.createTerminal('OCaml REPL', configuration.get<string>('replPath', 'ocaml'));
-                // FIXME: Sleep 500ms to wait for repl initialized.
-                await sleep(500);
-            }
+            checkREPL();
             replTerm.show(!configuration.get<boolean>('replFocus', false));
 
             let editor = vscode.window.activeTextEditor;
@@ -440,14 +437,24 @@ export function activate(context: vscode.ExtensionContext) {
         })
     );
 
+    function suffix() {
+        if (/win/.test(process.platform)) {
+            return 'windows';
+        }
+        return 'unix';
+    }
+
+    function checkREPL() {
+        if (!replTerm) {
+            replTerm = vscode.window.createTerminal('OCaml REPL', 
+                configuration.get<string>('replPath' + '.' + suffix(), 'ocaml'));
+        }
+    }
+    
 
     context.subscriptions.push(
         vscode.commands.registerCommand('ocaml.repl_send_stmt', async () => {
-            if (!replTerm) {
-                replTerm = vscode.window.createTerminal('OCaml REPL', configuration.get<string>('replPath', 'ocaml'));
-                // FIXME: Sleep 500ms to wait for repl initialized.
-                await sleep(500);
-            }
+            checkREPL();
             replTerm.show(!configuration.get<boolean>('replFocus', false));
 
             let editor = vscode.window.activeTextEditor;
