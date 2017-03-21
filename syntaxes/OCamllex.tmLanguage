@@ -98,7 +98,7 @@
 							<key>match</key>
 							<string>[a-z][a-zA-Z0-9_]*</string>
 							<key>name</key>
-                			<string>variable.parameter.rule.ocamllex</string>
+							<string>variable.parameter.rule.ocamllex</string>
 						</dict>
 					</array>
 				</dict>
@@ -351,7 +351,7 @@
 				</dict>
 				<dict>
 					<key>match</key>
-					<string>[a-z][a-zA-Z0-9'_]</string>
+					<string>[a-z][a-zA-Z0-9'_]*</string>
 					<key>name</key>
 					<string>entity.name.type.pattern.reference.stupid-goddamn-hack.ocamllex</string>
 				</dict>
