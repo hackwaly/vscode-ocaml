@@ -59,7 +59,7 @@ patterns:
 
 - name: meta.type-definition-group.ocaml
   begin: ^\s*(?=type\s)
-  end: \b(?=let|end|val)$
+  end: \b(?=let|end|val)
   patterns:
   - name: meta.type-definition.ocaml
     begin: \b(type|and)\s+([^=]*)(=)

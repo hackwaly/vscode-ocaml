@@ -193,7 +193,7 @@
 			<key>begin</key>
 			<string>^\s*(?=type\s)</string>
 			<key>end</key>
-			<string>\b(?=let|end|val)$</string>
+			<string>\b(?=let|end|val)</string>
 			<key>name</key>
 			<string>meta.type-definition-group.ocaml</string>
 			<key>patterns</key>
