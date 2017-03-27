@@ -438,7 +438,7 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     function suffix() {
-        if (/win/.test(process.platform)) {
+        if (/^win/.test(process.platform)) {
             return 'windows';
         }
         return 'unix';
