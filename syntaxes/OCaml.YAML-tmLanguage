@@ -59,7 +59,7 @@ patterns:
 
 - name: meta.type-definition-group.ocaml
   begin: ^\s*(?=type\s)
-  end: \b(?=let|end|val)|^\s*$
+  end: \b(?=let|end|val)$
   patterns:
   - name: meta.type-definition.ocaml
     begin: \b(type|and)\s+([^=]*)(=)
@@ -67,7 +67,7 @@ patterns:
       '1': {name: keyword.other.type-definition.ocaml}
       '2': {name: storage.type.ocaml}
       '3': {name: punctuation.separator.type-definition.ocaml}
-    end: (?=\b(type|and|let|end|val)\b)|(?=^\s*$)
+    end: (?=\b(type|and|let|end|val)\b)
     patterns:
     - include: '#typedefs'
   - name: meta.type-definition.ocaml
@@ -76,7 +76,8 @@ patterns:
       '1': {name: keyword.other.type-definition.ocaml}
       '2': {name: storage.type.ocaml}
       '3': {name: punctuation.separator.type-definition.ocaml}
-    end: (?=\b(type|and|let|end|val)\b)|(?=^\s*$)
+    end: (?=\b(type|and|let|end|val)\b)
+  - include: '#comments'
 
 - name: meta.pattern-match.ocaml
   begin: \b(with|function)(?=(?:\s*$|.*->))\b|((?<!\S)(\|)(?=(\w|\s).*->))
