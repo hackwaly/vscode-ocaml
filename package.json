@@ -9,6 +9,10 @@
   "engines": {
     "vscode": "^1.6.0"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hackwaly/vscode-ocaml"
+  },
   "categories": [
     "Languages",
     "Linters",
