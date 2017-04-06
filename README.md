@@ -32,6 +32,7 @@ This extension contributes the following settings:
 
 * `ocaml.ocpIndentPath`: Path to ocp-indent.
 * `ocaml.merlinPath`: Path to ocamlmerlin.
+* `ocaml.replPath.windows` or `ocaml.replPath.unix`: Path to ocaml REPL, eg "ocaml.exe", "utop".
 * `ocaml.lintDelay`: Time to delay lint when made changes.
 * `ocaml.lintOnChange`: Do lint when made changes.
 * `ocaml.lintOnSave`: Do lint when save document.
@@ -68,22 +69,7 @@ clean:
 		"taskName": "clean"
 	}, {
 		"taskName": "build",
-		"problemMatcher": {
-			"fileLocation": "relative",
-			"owner": "ocaml",
-			"pattern": [{
-				"regexp": "^File \"(.*)\", line (\\d+)(?:, characters (\\d+)-(\\d+))?:$",
-				"file": 1,
-				"line": 2,
-				"column": 3,
-				"endColumn": 4
-			}, {
-				"regexp": "^(?:(?:Parse\\s+)?(Warning|[Ee]rror)(?:\\s+\\d+)?:)?\\s+(.*)$",
-				"severity": 1,
-				"message": 2,
-				"loop": true
-			}]
-		}
+		"problemMatcher": "$ocamlc"
 	}]
 }
 ```
