@@ -536,25 +536,25 @@ export function activate(context: vscode.ExtensionContext) {
         return diagnostics;
     };
 
-    let LINTER_DEBOUNCE_TIMER = Symbol();
-    let LINTER_TOKEN_SOURCE = Symbol();
-    let LINTER_CLEAR_LISTENER = Symbol();
+    let LINTER_DEBOUNCE_TIMER = new WeakMap();
+    let LINTER_TOKEN_SOURCE = new WeakMap();
+    let LINTER_CLEAR_LISTENER = new WeakMap();
 
     let diagnosticCollection = vscode.languages.createDiagnosticCollection('merlin');
 
     let lintDocument = (document: vscode.TextDocument) => {
         if (document.languageId !== 'ocaml') return;
 
-        clearTimeout(document[LINTER_DEBOUNCE_TIMER]);
-        document[LINTER_DEBOUNCE_TIMER] = setTimeout(async () => {
-            if (document[LINTER_TOKEN_SOURCE]) {
-                document[LINTER_TOKEN_SOURCE].cancel();
+        clearTimeout(LINTER_DEBOUNCE_TIMER.get(document));
+        LINTER_DEBOUNCE_TIMER.set(document, setTimeout(async () => {
+            if (LINTER_TOKEN_SOURCE.has(document)) {
+                LINTER_TOKEN_SOURCE.get(document).cancel();
             }
-            document[LINTER_TOKEN_SOURCE] = new vscode.CancellationTokenSource();
+            LINTER_TOKEN_SOURCE.set(document, new vscode.CancellationTokenSource());
 
-            let diagnostics = await provideLinter(document, document[LINTER_TOKEN_SOURCE].token);
+            let diagnostics = await provideLinter(document, LINTER_TOKEN_SOURCE.get(document).token);
             diagnosticCollection.set(document.uri, diagnostics);
-        }, configuration.get<number>('lintDelay'));
+        }, configuration.get<number>('lintDelay')));
     };
 
     vscode.workspace.onDidSaveTextDocument(async (document) => {
