@@ -193,7 +193,7 @@
 			<key>begin</key>
 			<string>^\s*(?=type\s)</string>
 			<key>end</key>
-			<string>\b(?=let|end|val|module|include|open|exception|class|external|\[%|\[@@)</string>
+			<string>(?=;;|\[%|\[@@|\b(let|end|val|module|include|open|exception|class|external)\b)</string>
 			<key>name</key>
 			<string>meta.type-definition-group.ocaml</string>
 			<key>patterns</key>
@@ -220,7 +220,7 @@
 						</dict>
 					</dict>
 					<key>end</key>
-					<string>(?=\b(type|and|let|end|val|module|include|open|exception|class|external|\[%|\[@@)\b)</string>
+					<string>(?=;;|\[%|\[@@|\b(type|and|let|end|val|module|include|open|exception|class|external)\b)</string>
 					<key>name</key>
 					<string>meta.type-definition.ocaml</string>
 					<key>patterns</key>
@@ -253,7 +253,7 @@
 						</dict>
 					</dict>
 					<key>end</key>
-					<string>(?=\b(type|and|let|end|val|module|exception|class|external|\[%|\[@@)\b)</string>
+					<string>(?=;;|\[%|\[@@|\b(type|and|let|end|val|module|exception|class|external)\b)</string>
 					<key>name</key>
 					<string>meta.type-definition.ocaml</string>
 				</dict>
