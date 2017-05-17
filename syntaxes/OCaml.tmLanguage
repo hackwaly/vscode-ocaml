@@ -2212,7 +2212,7 @@
 				</dict>
 				<dict>
 					<key>match</key>
-					<string>as</string>
+					<string>\bas\b</string>
 					<key>name</key>
 					<string>keyword.other.ocaml</string>
 				</dict>
