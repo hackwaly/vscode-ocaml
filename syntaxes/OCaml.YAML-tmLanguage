@@ -694,8 +694,6 @@ repository:
         patterns:
         - include: '#matchpatterns'
     - include: '#storagetypes'
-    - name: keyword.other.ocaml
-      match: 'as'
     - name: variable.parameter.ocaml
       match: \b[a-z_][a-zA-Z0-9'_]*
 foldingStartMarker: (\b(module|class|)\s.*?=\s*$|\bbegin|sig|struct|(object(\s*\(_?[a-z]+\))?)\s*$|\bwhile\s.*?\bdo\s*$|^let(?:\s+rec)?\s+[a-z_][a-zA-Z0-9_]*\s+(?!=)\S)
