@@ -36,7 +36,7 @@ export class OCamlMerlinSession {
         this._cp.on('exit', (code, signal) => {
             log(`OCamlmerlin exited with code ${code}, signal ${signal}`);
         });
-        this._cp.stdout.setEncoding("ascii");
+        this._cp.stdout.setEncoding("utf-8");
         this._cp.stdin['setDefaultEncoding']("ascii");
 
         this._rl = readline.createInterface({
