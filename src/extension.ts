@@ -523,9 +523,9 @@ export function activate(context: vscode.ExtensionContext) {
                 }
                 return;
             }
-
+            
             let diag = new vscode.Diagnostic(
-                toVsRange(start, end),
+                toVsRange(start || 0, end || 0),
                 message,
                 fromType(type.toLowerCase())
             );
