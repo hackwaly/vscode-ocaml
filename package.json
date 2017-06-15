@@ -3,7 +3,7 @@
   "name": "ocaml",
   "displayName": "OCaml",
   "description": "Rich OCaml language support for Visual Studio Code",
-  "version": "0.6.30",
+  "version": "0.6.31",
   "publisher": "hackwaly",
   "icon": "images/colour-icon.svg",
   "engines": {
@@ -38,7 +38,9 @@
         ],
         "extensions": [
           ".ml",
-          ".mli",
+          ".mli"
+        ],
+        "filenames": [
           ".ocamlinit"
         ],
         "configuration": "./ocaml.configuration.json"
@@ -283,6 +285,20 @@
           "default": true,
           "description": "Append newline when send selection to REPL."
         }
+      }
+    },
+    "configurationDefaults":{
+      "[ocaml]": {
+        "editor.tabSize": 2,
+        "editor.insertSpaces": true
+      },
+      "[ocamllex]": {
+        "editor.tabSize": 2,
+        "editor.insertSpaces": true
+      },
+      "[menhir]": {
+        "editor.tabSize": 2,
+        "editor.insertSpaces": true
       }
     }
   },
