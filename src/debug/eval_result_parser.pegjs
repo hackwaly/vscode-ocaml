@@ -17,7 +17,7 @@ tuple = head:primary tail:(_ ',' _ primary)* { var items = fixList1(head, tail);
 unit = '()' { return {kind: 'plain', value: '()'}; }
 paren = '(' _ value:value _ ')' { return value; }
 primary = unit / paren / string / char / con / record / array / list / plain
-con = con:id _ args:value { return {kind: 'con', con:con, args: args}; }
+con = con:id _ arg:primary { return {kind: 'con', con: con, arg: arg}; }
 record = '{' _ list:field_list? _ '}' { return {kind: 'record', items: fixList(list)} }
 field = name:id _ '=' _ value:value { return {name: name, value: value}; }
 field_list = head:field tail:(_ ';' _ field)* { return fixList1(head, tail); }

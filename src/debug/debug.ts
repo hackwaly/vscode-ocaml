@@ -493,7 +493,7 @@ class OCamlDebugSession extends DebugSession {
                 case 'plain':
                     return value.value;
                 case 'con':
-                    return `${value.con} ${repr(value.args)}`;
+                    return `${value.con} ${repr(value.arg)}`;
                 case 'tuple':
                     return `(${value.items.map(repr).join(', ')})`;
                 case 'array':
@@ -509,7 +509,7 @@ class OCamlDebugSession extends DebugSession {
             return async () => {
                 switch (value.kind) {
                     case 'con':
-                        return [createVariable('%arguments', value.args)];
+                        return [createVariable("0", value.arg)];
                     case 'tuple':
                         return value.items.map((item, index) => createVariable(`%${index + 1}`, item));
                     case 'array':
@@ -530,8 +530,8 @@ class OCamlDebugSession extends DebugSession {
                 case 'plain':
                     return new Variable(name, text);
                 case 'con':
-                    numNamed = 1;
-                    numIndexed = 0;
+                    numNamed = 0;
+                    numIndexed = 1;
                     break;
                 case 'record':
                 case 'tuple':

@@ -3,7 +3,7 @@
   "name": "ocaml",
   "displayName": "OCaml",
   "description": "Rich OCaml language support for Visual Studio Code",
-  "version": "0.6.31",
+  "version": "0.6.32",
   "publisher": "hackwaly",
   "icon": "images/colour-icon.svg",
   "engines": {
@@ -287,7 +287,7 @@
         }
       }
     },
-    "configurationDefaults":{
+    "configurationDefaults": {
       "[ocaml]": {
         "editor.tabSize": 2,
         "editor.insertSpaces": true
