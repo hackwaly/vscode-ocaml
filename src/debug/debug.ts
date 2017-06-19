@@ -176,16 +176,16 @@ class OCamlDebugSession extends DebugSession {
         this.sendResponse(response);
     }
 
-    protected disconnectRequest(response: DebugProtocol.DisconnectResponse, args: DebugProtocol.DisconnectArguments): void {
+    protected disconnectRequest(response: DebugProtocol.DisconnectResponse, args: DebugProtocol.DisconnectArguments): void {        
+        if (this._debuggerProc) {
+            this._debuggerProc.stdin.end('quit\n');
+            this._debuggerProc.kill();
+        }
+
         if (this._debuggeeProc) {
             this._debuggeeProc.stdout.removeAllListeners();
             this._debuggeeProc.stderr.removeAllListeners();
             this._debuggeeProc.kill();
-        }
-
-        if (this._debuggerProc) {
-            this._debuggerProc.stdin.end('quit\n');
-            this._debuggerProc.kill();
         }
 
         this._remoteMode = false;
