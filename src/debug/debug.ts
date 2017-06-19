@@ -77,6 +77,7 @@ class OCamlDebugSession extends DebugSession {
 
     constructor() {
         super();
+        this.setRunAsServer(false);
     }
 
     log(msg: string) {
@@ -178,8 +179,10 @@ class OCamlDebugSession extends DebugSession {
 
     protected disconnectRequest(response: DebugProtocol.DisconnectResponse, args: DebugProtocol.DisconnectArguments): void {        
         if (this._debuggerProc) {
-            this._debuggerProc.stdin.end('quit\n');
-            this._debuggerProc.kill();
+            this._debuggerProc.stdin.end('kill\nquit\n', () => {
+                this._debuggerProc.kill();
+                this._debuggerProc = null;
+            });
         }
 
         if (this._debuggeeProc) {
@@ -191,7 +194,6 @@ class OCamlDebugSession extends DebugSession {
         this._remoteMode = false;
         this._socket = null;
         this._debuggeeProc = null;
-        this._debuggerProc = null;
         this._breakpoints = null;
         this._functionBreakpoints = null;
         this._variableHandles.reset();
