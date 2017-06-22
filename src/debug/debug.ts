@@ -22,7 +22,7 @@ let iconv = require('iconv-lite');
 let DECODED_STDOUT = Symbol();
 let DECODED_STDERR = Symbol();
 
-interface LaunchRequestArguments {
+interface LaunchRequestArguments extends DebugProtocol.LaunchRequestArguments {
     cd: string;
     includePath?: string[];
     program: string;
@@ -204,6 +204,61 @@ class OCamlDebugSession extends DebugSession {
     }
 
     protected async launchRequest(response: DebugProtocol.LaunchResponse, args: LaunchRequestArguments) {
+        let checkEncoding = (name: string, encoding: string) => {
+            if (encoding) {
+                if (iconv.encodingExists(encoding)) {
+                    return encoding;
+                }
+                this.sendEvent(new OutputEvent(`Encoding "${encoding}" specified by option "${name}" isn't supported. Fallback to "utf-8" encoding.\n`));
+            }
+            return 'utf-8';
+        };
+
+        let launchDebuggee = (env) => {
+            if (this._supportRunInTerminal && (args.console === 'integratedTerminal' || args.console === 'externalTerminal')) {
+                this.runInTerminalRequest({
+                    title: 'OCaml Debug Console',
+                    kind: args.console === 'integratedTerminal' ? 'integrated' : 'external',
+                    env: env,
+                    cwd: args.cd || path.dirname(args.program),
+                    args: [args.program, ...(args.arguments || [])]
+                }, 5000, (runResp) => {
+                    if (!runResp.success) {
+                        // TOOD: Use sendErrorResponse instead.
+                        this.sendEvent(new OutputEvent(runResp.message));
+                        this.sendEvent(new TerminatedEvent());
+                    }
+                });
+            } else {
+                this._debuggeeProc = child_process.spawn(args.program, args.arguments || [], {
+                    env: Object.assign({}, process.env, env),
+                    cwd: args.cd || path.dirname(args.program)
+                });
+
+                let debuggeeEncoding = checkEncoding('encoding', args.encoding);
+                this._debuggeeProc[DECODED_STDOUT] = iconv.decodeStream(debuggeeEncoding);
+                this._debuggeeProc.stdout.pipe(this._debuggeeProc[DECODED_STDOUT]);
+                this._debuggeeProc[DECODED_STDOUT].on('data', (chunk) => {
+                    this.sendEvent(new OutputEvent(chunk, 'stdout'));
+                });
+
+                this._debuggeeProc[DECODED_STDERR] = iconv.decodeStream(debuggeeEncoding);
+                this._debuggeeProc.stderr.pipe(this._debuggeeProc[DECODED_STDERR]);
+                this._debuggeeProc[DECODED_STDERR].on('data', (chunk) => {
+                    this.sendEvent(new OutputEvent(chunk, 'stderr'));
+                });
+                this._debuggeeProc.on('exit', () => {
+                    this.sendEvent(new TerminatedEvent());
+                });
+            }
+        };
+
+        if (args.noDebug) {
+            launchDebuggee({});
+            this.sendEvent(new InitializedEvent());
+            return;
+        }
+
         let ocdArgs = [];
         if (args.cd) {
             ocdArgs.push('-cd', args.cd);
@@ -231,24 +286,12 @@ class OCamlDebugSession extends DebugSession {
 
         this._launchArgs = args;
 
-        let checkEncoding = (name: string, encoding: string) => {
-            if (encoding) {
-                if (iconv.encodingExists(encoding)) {
-                    return encoding;
-                }
-                this.sendEvent(new OutputEvent(`Encoding "${encoding}" specified by option "${name}" isn't supported. Fallback to "utf-8" encoding.\n`));
-            }
-            return 'utf-8';
-        };
-
-        let debuggerEncoding = checkEncoding('ocamldebugEncoding', args.ocamldebugEncoding);
-        let debuggeeEncoding = checkEncoding('encoding', args.encoding);
-
         this._debuggerProc = child_process.spawn('ocamldebug', ocdArgs);
         this._debuggerProc.on('exit', () => {
             this.sendEvent(new TerminatedEvent());
         });
 
+        let debuggerEncoding = checkEncoding('ocamldebugEncoding', args.ocamldebugEncoding);
         this._debuggerProc[DECODED_STDOUT] = iconv.decodeStream(debuggerEncoding);
         this._debuggerProc.stdout.pipe(this._debuggerProc[DECODED_STDOUT]);
         this._debuggerProc[DECODED_STDERR] = iconv.decodeStream(debuggerEncoding);
@@ -261,41 +304,6 @@ class OCamlDebugSession extends DebugSession {
         this._wait = this.readUntilPrompt().then(() => { });
         this.ocdCommand(['set', 'loadingmode', 'manual'], () => { });
 
-        let launchDebuggee = () => {
-            if (this._supportRunInTerminal && args.console === 'integratedTerminal' || args.console === 'externalTerminal') {
-                this.runInTerminalRequest({
-                    title: 'OCaml Debug Console',
-                    kind: args.console === 'integratedTerminal' ? 'integrated' : 'external',
-                    env: { "CAML_DEBUG_SOCKET": this._socket },
-                    cwd: args.cd || path.dirname(args.program),
-                    args: [args.program, ...(args.arguments || [])]
-                }, 5000, (runResp) => {
-                    if (!runResp.success) {
-                        // TOOD: Use sendErrorResponse instead.
-                        this.sendEvent(new OutputEvent(runResp.message));
-                        this.sendEvent(new TerminatedEvent());
-                    }
-                });
-            } else {
-                this._debuggeeProc = child_process.spawn(args.program, args.arguments || [], {
-                    env: Object.assign({}, process.env, { "CAML_DEBUG_SOCKET": this._socket }),
-                    cwd: args.cd || path.dirname(args.program)
-                });
-
-                this._debuggeeProc[DECODED_STDOUT] = iconv.decodeStream(debuggeeEncoding);
-                this._debuggeeProc.stdout.pipe(this._debuggeeProc[DECODED_STDOUT]);
-                this._debuggeeProc[DECODED_STDOUT].on('data', (chunk) => {
-                    this.sendEvent(new OutputEvent(chunk, 'stdout'));
-                });
-
-                this._debuggeeProc[DECODED_STDERR] = iconv.decodeStream(debuggeeEncoding);
-                this._debuggeeProc.stderr.pipe(this._debuggeeProc[DECODED_STDERR]);
-                this._debuggeeProc[DECODED_STDERR].on('data', (chunk) => {
-                    this.sendEvent(new OutputEvent(chunk, 'stderr'));
-                });
-            }
-        };
-
         let once = false;
         let onceSocketListened = (message: string) => {
             if (once) return;
@@ -304,7 +312,7 @@ class OCamlDebugSession extends DebugSession {
             if (this._remoteMode) {
                 this.sendEvent(new OutputEvent(message));
             } else {
-                launchDebuggee();
+                launchDebuggee({ "CAML_DEBUG_SOCKET": this._socket });
             }
         };
 

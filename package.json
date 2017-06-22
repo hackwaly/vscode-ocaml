@@ -3,7 +3,7 @@
   "name": "ocaml",
   "displayName": "OCaml",
   "description": "Rich OCaml language support for Visual Studio Code",
-  "version": "0.6.35",
+  "version": "0.6.36",
   "publisher": "hackwaly",
   "icon": "images/colour-icon.svg",
   "engines": {
@@ -188,6 +188,10 @@
                 "description": "Where to launch the debug target: internal console, integrated terminal, or external terminal.",
                 "default": "internalConsole"
               },
+              "noDebug": {
+                "type": "boolean",
+                "default": false
+              },
               "program": {
                 "type": "string",
                 "description": "The path of program to debug."
@@ -316,7 +320,7 @@
     "get-stream": "^2.2.1",
     "iconv-lite": "^0.4.13",
     "tiny-promisify": "^0.1.1",
-    "vscode-debugadapter": "^1.12.0",
-    "vscode-debugprotocol": "^1.12.0"
+    "vscode-debugadapter": "^1.20.0",
+    "vscode-debugprotocol": "^1.20.0"
   }
 }

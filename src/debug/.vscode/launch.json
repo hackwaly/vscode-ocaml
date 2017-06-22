@@ -13,7 +13,9 @@
             "env": {
                 "DEBUG_VSCODE_OCAML": "development"
             },
-			"outDir": "${workspaceRoot}/../../out/src/debug"
+			"outFiles": [
+				"${workspaceRoot}/../../out/src/debug"
+			]
 		}
 	]
 }
