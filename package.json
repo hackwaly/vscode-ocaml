@@ -3,7 +3,7 @@
   "name": "ocaml",
   "displayName": "OCaml",
   "description": "Rich OCaml language support for Visual Studio Code",
-  "version": "0.6.36",
+  "version": "0.6.37",
   "publisher": "hackwaly",
   "icon": "images/colour-icon.svg",
   "engines": {
@@ -188,6 +188,17 @@
                 "description": "Where to launch the debug target: internal console, integrated terminal, or external terminal.",
                 "default": "internalConsole"
               },
+							"env": {
+								"type": "object",
+								"additionalProperties": { "type": "string" },
+								"description": "Environment variables passed to the program.",
+								"default": {}
+							},
+							"envFile": {
+								"type": "string",
+								"description": "Absolute path to a file containing environment variable definitions.",
+								"default": "${workspaceRoot}/.env"
+							},
               "noDebug": {
                 "type": "boolean",
                 "default": false

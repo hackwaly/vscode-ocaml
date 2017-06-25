@@ -28,6 +28,8 @@ interface LaunchRequestArguments extends DebugProtocol.LaunchRequestArguments {
     program: string;
     console: "internalConsole" | "integratedTerminal" | "externalTerminal",
     arguments?: string[];
+    env?: {[index: string]: string};
+    envFile?: string;
     stopOnEntry: boolean;
     socket?: string;
     symbols?: string;
@@ -203,6 +205,30 @@ class OCamlDebugSession extends DebugSession {
         super.disconnectRequest(response, args);
     }
 
+    private loadEnv(envFile: string, env: {[index: string]: string}) {
+        const envMap : ({[index: string]: string}) = {};
+        if (envFile) {
+            let content = fs.readFileSync(envFile, 'utf8')
+            content.split('\n').forEach( line => {
+                const r = line.match(/^\s*([\w\.\-]+)\s*=\s*(.*)?\s*$/);
+                if (r !== null) {
+                    const key = r[1];
+                    if (!process.env[key]) {	// .env variables never overwrite existing variables (see #21169)
+                        let value = r[2] || '';
+                        if (value.length > 0 && value.charAt(0) === '"' && value.charAt(value.length-1) === '"') {
+                            value = value.replace(/\\n/gm, '\n');
+                        }
+                        envMap[key] = value.replace(/(^['"]|['"]$)/g, '');
+                    }
+                }
+            });
+        }
+        if (env) {
+            Object.assign(envMap, env);
+        }
+        return envMap;
+    }
+
     protected async launchRequest(response: DebugProtocol.LaunchResponse, args: LaunchRequestArguments) {
         let checkEncoding = (name: string, encoding: string) => {
             if (encoding) {
@@ -214,7 +240,9 @@ class OCamlDebugSession extends DebugSession {
             return 'utf-8';
         };
 
-        let launchDebuggee = (env) => {
+        let env = this.loadEnv(args.envFile, args.env);
+
+        let launchDebuggee = () => {
             if (this._supportRunInTerminal && (args.console === 'integratedTerminal' || args.console === 'externalTerminal')) {
                 this.runInTerminalRequest({
                     title: 'OCaml Debug Console',
@@ -254,7 +282,7 @@ class OCamlDebugSession extends DebugSession {
         };
 
         if (args.noDebug) {
-            launchDebuggee({});
+            launchDebuggee();
             this.sendEvent(new InitializedEvent());
             return;
         }
@@ -278,6 +306,7 @@ class OCamlDebugSession extends DebugSession {
             let port = await freeport();
             this._socket = `127.0.0.1:${port}`;
         }
+        env["CAML_DEBUG_SOCKET"] = this._socket;
 
         ocdArgs.push('-s', this._socket);
         // ocdArgs.push('-machine-readable');
@@ -312,7 +341,7 @@ class OCamlDebugSession extends DebugSession {
             if (this._remoteMode) {
                 this.sendEvent(new OutputEvent(message));
             } else {
-                launchDebuggee({ "CAML_DEBUG_SOCKET": this._socket });
+                launchDebuggee();
             }
         };
 
