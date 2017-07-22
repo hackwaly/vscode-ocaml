@@ -297,7 +297,8 @@ export function activate(context: vscode.ExtensionContext) {
                     }
                 }
 
-                if (type.includes('\n')) {
+                // Since vscode shows scrollbar in hovertip. We don't need to truncate it ever.
+              /*   if (type.includes('\n')) {
                     let lines = type.split(/\n/g);
                     if (lines.length > 6) {
                         let end = lines.pop();
@@ -306,7 +307,7 @@ export function activate(context: vscode.ExtensionContext) {
                         lines.push(end);
                     }
                     type = lines.join('\n');
-                }
+                } */
 
                 if (/^sig\b/.test(type)) {
                     type = `module type _ = ${type}`;
