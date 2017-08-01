@@ -5,6 +5,7 @@ import {OCamlMerlinSession} from './merlin';
 import * as child_process from 'child_process';
 import * as Path from 'path';
 import * as Fs from 'fs';
+import {opamSpawn, wrapOpamExec} from './utils';
 
 let promisify = require('tiny-promisify');
 let fsExists = (path: string) => new Promise((resolve) => {
@@ -22,13 +23,13 @@ let configuration = vscode.workspace.getConfiguration("ocaml");
 let doOcpIndent = async (document: vscode.TextDocument, token: vscode.CancellationToken, range?: vscode.Range) => {
     let code = document.getText();
     let ocpIndentPath = configuration.get<string>('ocpIndentPath');
-    let args = [];
+    let cmd = [ocpIndentPath];
     if (range) {
-        args.push('--lines');
-        args.push(`${range.start.line + 1}-${range.end.line + 1}`);
+        cmd.push('--lines');
+        cmd.push(`${range.start.line + 1}-${range.end.line + 1}`);
     }
-    args.push('--numeric');
-    let cp = child_process.spawn(ocpIndentPath, args, {
+    cmd.push('--numeric');
+    let cp = await opamSpawn(cmd, {
         cwd: Path.dirname(document.fileName)
     });
 
@@ -420,14 +421,14 @@ export function activate(context: vscode.ExtensionContext) {
                 replTerm.dispose();
                 replTerm = null;
             }
-            checkREPL();
+            await checkREPL();
             replTerm.show();
         })
     );
 
     context.subscriptions.push(
         vscode.commands.registerCommand('ocaml.repl_send', async () => {
-            checkREPL();
+            await checkREPL();
             replTerm.show(!configuration.get<boolean>('replFocus', false));
 
             let editor = vscode.window.activeTextEditor;
@@ -445,17 +446,16 @@ export function activate(context: vscode.ExtensionContext) {
         return 'unix';
     }
 
-    function checkREPL() {
+    async function checkREPL() {
         if (!replTerm) {
-            replTerm = vscode.window.createTerminal('OCaml REPL', 
-                configuration.get<string>('replPath' + '.' + suffix(), 'ocaml'));
+            let path = configuration.get<string>('replPath' + '.' + suffix(), 'ocaml');
+            replTerm = vscode.window.createTerminal('OCaml REPL', path);
         }
     }
     
-
     context.subscriptions.push(
         vscode.commands.registerCommand('ocaml.repl_send_stmt', async () => {
-            checkREPL();
+            await checkREPL();
             replTerm.show(!configuration.get<boolean>('replFocus', false));
 
             let editor = vscode.window.activeTextEditor;
@@ -473,6 +473,51 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.commands.registerCommand('ocaml.restart_merlin', async () => {
             session.restart();
+        })
+    );
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('ocaml.opam_switch', async () => {
+            let opamPath = configuration.get<string>('opamPath');
+            let result: string = await new Promise<string>((resolve, reject) => {
+                child_process.exec(`${opamPath} switch list --all`, (err, stdout) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(stdout);
+                    }
+                });
+            });
+            let lines = result.split(/\r?\n|\r/g);
+            lines = lines.filter((line) => !!line);
+            let items = lines.map((line) => {
+                let match = /^(\S+)\s+(\S+)\s+(\S+)\s+(.*)$/.exec(line);
+                return {
+                    A: match[1],
+                    B: match[2],
+                    C: match[3],
+                    D: match[4],
+                };
+            }).filter((item) => {
+                return item.A !== '--';
+            }).map((item) => {
+                let desc = item.B === 'C' ? 'Current' : '';
+                return {
+                    label: item.A,
+                    description: desc,
+                    detail: item.D,
+                };
+            });
+            let item = await vscode.window.showQuickPick(items, {
+                placeHolder: 'Select Opam Switch'
+            });
+            child_process.exec(`${opamPath} switch ${item.label}`, (err, stdout) => {
+                if (err) {
+                    vscode.window.showErrorMessage(err.toString());
+                } else if (stdout) {
+                    vscode.window.showInformationMessage(stdout.replace(/\r?\n|\r/g, ' '));
+                }
+            });
         })
     );
 

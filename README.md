@@ -15,9 +15,9 @@ This is an VS Code extension that provides OCaml language support.
 * Debugger integrated. _powered by ocamldebug_
 * UTop integrated. _since v0.6.2_
 
-![features](http://i.giphy.com/26BRsQmMAHdg1LNRe.gif)
+![features](https://i.giphy.com/26BRsQmMAHdg1LNRe.gif)
 
-![debugger](http://i.giphy.com/l46Cx0HvCXnUrVOkU.gif)
+![debugger](https://i.giphy.com/l46Cx0HvCXnUrVOkU.gif)
 
 ## Requirements
 
@@ -103,6 +103,7 @@ Support launch debug target in Integrated Terminal.
 Add a command to switch between module implementation/signature.
 Support Find references in file.
 UTop integrated.
+Add opam switch command.
 [More Info](https://github.com/hackwaly/vscode-ocaml/milestone/3?closed=1)
 
 ### 0.5.0

@@ -3,9 +3,9 @@
   "name": "ocaml",
   "displayName": "OCaml",
   "description": "Rich OCaml language support for Visual Studio Code",
-  "version": "0.6.38",
+  "version": "0.6.39",
   "publisher": "hackwaly",
-  "icon": "images/colour-icon.svg",
+  "icon": "images/colour-icon.png",
   "engines": {
     "vscode": "^1.6.0"
   },
@@ -24,6 +24,7 @@
     "onCommand:ocaml.repl_send",
     "onCommand:ocaml.repl_send_stmt",
     "onCommand:ocaml.restart_merlin",
+    "onCommand:ocaml.opam_switch",
     "onLanguage:ocaml",
     "onLanguage:ocamllex",
     "onLanguage:menhir"
@@ -114,6 +115,11 @@
         "category": "OCaml",
         "command": "ocaml.restart_merlin",
         "title": "Restart Merlin Session"
+      },
+      {
+        "category": "OCaml",
+        "command": "ocaml.opam_switch",
+        "title": "Opam Switch"
       }
     ],
     "grammars": [
@@ -188,17 +194,19 @@
                 "description": "Where to launch the debug target: internal console, integrated terminal, or external terminal.",
                 "default": "internalConsole"
               },
-							"env": {
-								"type": "object",
-								"additionalProperties": { "type": "string" },
-								"description": "Environment variables passed to the program.",
-								"default": {}
-							},
-							"envFile": {
-								"type": "string",
-								"description": "Absolute path to a file containing environment variable definitions.",
-								"default": "${workspaceRoot}/.env"
-							},
+              "env": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "description": "Environment variables passed to the program.",
+                "default": {}
+              },
+              "envFile": {
+                "type": "string",
+                "description": "Absolute path to a file containing environment variable definitions.",
+                "default": "${workspaceRoot}/.env"
+              },
               "noDebug": {
                 "type": "boolean",
                 "default": false
@@ -255,6 +263,21 @@
       "type": "object",
       "title": "OCaml configuration",
       "properties": {
+        "ocaml.opamPath": {
+          "type": "string",
+          "default": "opam",
+          "description": "Path to opam."
+        },
+        "ocaml.useOpamToResolve": {
+          "type": "boolean",
+          "default": false,
+          "description": "Use opam to resolve executable paths this extension needs."
+        },
+        "ocaml.ocamldebugPath": {
+          "type": "string",
+          "default": "ocamldebug",
+          "description": "Path to ocamldebug."
+        },
         "ocaml.ocpIndentPath": {
           "type": "string",
           "default": "ocp-indent",
@@ -327,6 +350,7 @@
     "vscode": "^0.11.0"
   },
   "dependencies": {
+    "compare-versions": "^3.0.1",
     "freeport": "^1.0.5",
     "get-stream": "^2.2.1",
     "iconv-lite": "^0.4.13",

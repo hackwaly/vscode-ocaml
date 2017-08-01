@@ -3,14 +3,15 @@
 import * as vscode from 'vscode';
 import * as child_process from 'child_process';
 import * as readline from 'readline';
-import {log} from './utils';
+import {opamSpawn} from './utils';
+import log from './log';
 
 const noop = () => {};
 
 export class OCamlMerlinSession {
     private _cp: child_process.ChildProcess;
     private _rl: readline.ReadLine;
-    private _wait = Promise.resolve();
+    private _wait: Promise<void> = Promise.resolve();
     private _rejectWait = noop;
     private _protocolVersion: number = 1;
 
@@ -20,29 +21,33 @@ export class OCamlMerlinSession {
 
     restart() {
         this._rejectWait();
-        this._wait = Promise.resolve();
+
         if (this._rl) {
             this._rl.close();
             this._rl = null;
         }
+
         if (this._cp) {
             this._cp.kill();
             this._cp = null;
         }
 
-        let merlinPath = vscode.workspace.getConfiguration('ocaml').get<string>('merlinPath');
+        this._wait = new Promise<void>(async (resolve) => {
+            let merlinPath = vscode.workspace.getConfiguration('ocaml').get<string>('merlinPath');
 
-        this._cp = child_process.spawn(merlinPath, []);
-        this._cp.on('exit', (code, signal) => {
-            log(`OCamlmerlin exited with code ${code}, signal ${signal}`);
-        });
-        this._cp.stdout.setEncoding("utf-8");
-        this._cp.stdin['setDefaultEncoding']("ascii");
+            this._cp = await opamSpawn([merlinPath]);
+            this._cp.on('exit', (code, signal) => {
+                log(`OCamlmerlin exited with code ${code}, signal ${signal}`);
+            });
+            this._cp.stdout.setEncoding("utf-8");
+            this._cp.stdin['setDefaultEncoding']("ascii");
 
-        this._rl = readline.createInterface({
-            input: this._cp.stdout,
-            output: this._cp.stdin,
-            terminal: false
+            this._rl = readline.createInterface({
+                input: this._cp.stdout,
+                output: this._cp.stdin,
+                terminal: false
+            });
+            resolve();
         });
 
         this._wait = this.request(['protocol', 'version', 2]).then(([status, result]) => {

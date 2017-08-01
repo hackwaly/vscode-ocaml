@@ -12,7 +12,8 @@ import {
 import {DebugProtocol} from 'vscode-debugprotocol';
 import * as path from 'path';
 import * as fs from 'fs';
-import {log} from '../utils';
+import log from '../log';
+
 let evalResultParser = require('./eval_result_parser.js');
 
 let promisify = require('tiny-promisify');
