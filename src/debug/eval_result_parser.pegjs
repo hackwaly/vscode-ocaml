@@ -9,7 +9,8 @@ function fixList1(head, tail) {
 }
 }
 
-msg = name:id ':' _ type:type '=' _ value:value { return {name: name, type: type.trim(), value: value}; }
+msg = name:rid ':' _ type:type '=' _ value:value { return {name: name, type: type.trim(), value: value}; }
+rid = $([A-Za-z_'`][A-Za-z_'.0-9]* / '$' [0-9]+)
 id = $([A-Za-z_'`][A-Za-z_'.0-9]*)
 type = $([^=]+)
 value = tuple

@@ -8,14 +8,18 @@
         ["(", ")"]
     ],
     "autoClosingPairs": [
-        ["{", "}"],
-        ["[", "]"],
-        ["(", ")"],
-        ["\"", "\""]
+      { "open": "{", "close": "}" },
+      { "open": "[", "close": "]" },
+      { "open": "(", "close": ")" },
+      { "open": "\"", "close": "\"", "notIn": ["string", "comment"] },
+      { "open": "(**", "close": "*)", "notIn": ["string"] }
     ],
     "surroundingPairs": [
-        ["(", ")"],
-        ["[", "]"],
-        ["\"", "\""]
-    ]
+      { "open": "[", "close": "]" },
+      { "open": "(", "close": ")" },
+      { "open": "\"", "close": "\"" }
+    ],
+    "wordPattern": {
+      "pattern": "[A-Za-z_'`][A-Za-z_'.0-9]*"
+    }
 }
