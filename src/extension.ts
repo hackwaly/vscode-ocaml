@@ -387,15 +387,19 @@ export function activate(context: vscode.ExtensionContext) {
             let ext = Path.extname(path || '');
             let newExt = { '.mli': '.ml', '.ml': '.mli' }[ext];
             if (!newExt) {
-                await vscode.window.showInformationMessage('Target file must be an OCaml signature or implementation file');
+                vscode.window.showInformationMessage('Target file must be an OCaml signature or implementation file');
                 return;
             }
 
             let newPath = path.substring(0, path.length - ext.length) + newExt;
             if (!(await fsExists(newPath))) {
-                await fsWriteFile(newPath, '');
                 let name = { '.mli': 'Signature', '.ml': 'Implementation' }[newExt];
-                await vscode.window.showInformationMessage(`${name} file doesn't exist. New file has created for you.`);
+                let result = await vscode.window.showInformationMessage(`${name} file doesn't exist.`, 'Create It');
+                if (result === 'Create It') {
+                    await fsWriteFile(newPath, '');
+                } else {
+                    return;
+                }
             }
 
             await vscode.commands.executeCommand(
