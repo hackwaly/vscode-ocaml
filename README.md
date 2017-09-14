@@ -1,8 +1,4 @@
-# OCaml support for VS Code
-
-This is an VS Code extension that provides OCaml language support.
-
-> Contributions are welcome. [github repo](https://github.com/hackwaly/vscode-ocaml.git)
+# Deprecated. Please use [this plugin](https://github.com/reasonml-editor/vscode-reasonml) instead.
 
 ## Features
 
