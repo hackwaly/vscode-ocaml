@@ -22,6 +22,7 @@
     "onCommand:ocaml.switch_mli_ml",
     "onCommand:ocaml.repl",
     "onCommand:ocaml.repl_send",
+    "onCommand:ocaml.repl_send_all",
     "onCommand:ocaml.repl_send_stmt",
     "onCommand:ocaml.restart_merlin",
     "onCommand:ocaml.opam_switch",
@@ -105,6 +106,11 @@
         "category": "OCaml",
         "command": "ocaml.repl_send",
         "title": "Send Selection to REPL Session"
+      },
+      {
+        "category": "OCaml",
+        "command": "ocaml.repl_send_all",
+        "title": "Send File to REPL Session"
       },
       {
         "category": "OCaml",
