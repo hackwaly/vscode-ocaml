@@ -437,8 +437,21 @@ export function activate(context: vscode.ExtensionContext) {
 
             let editor = vscode.window.activeTextEditor;
             if (!editor) return;
-
+            
             let selection = editor.document.getText(editor.selection);
+            replTerm.sendText(selection, configuration.get<boolean>('replNewline', true));
+        })
+    );
+
+    context.subscriptions.push(
+        vscode.commands.registerCommand('ocaml.repl_send_all', async () => {
+            await checkREPL();
+            replTerm.show(!configuration.get<boolean>('replFocus', false));
+
+            let editor = vscode.window.activeTextEditor;
+            if (!editor) return;
+            
+            let selection = editor.document.getText();
             replTerm.sendText(selection, configuration.get<boolean>('replNewline', true));
         })
     );
