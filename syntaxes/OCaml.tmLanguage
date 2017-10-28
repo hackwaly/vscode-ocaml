@@ -968,13 +968,13 @@
 			<key>match</key>
 			<string>`[A-Za-z][a-zA-Z0-9'_]*\b</string>
 			<key>name</key>
-			<string>entity.name.type.variant.polymorphic.ocaml</string>
+			<string>constant.language.variant.polymorphic.ocaml</string>
 		</dict>
 		<dict>
 			<key>match</key>
 			<string>\b[A-Z][a-zA-Z0-9'_]*\b</string>
 			<key>name</key>
-			<string>entity.name.type.variant.ocaml</string>
+			<string>constant.language.variant.ocaml</string>
 		</dict>
 		<dict>
 			<key>match</key>
