@@ -1,6 +1,6 @@
 # If you are seeking for an OCaml debugger vscode extension. Take a look at [ocamlearlybird](https://github.com/hackwaly/ocamlearlybird/).
 
-> Deprecated. Please use [this plugin](https://github.com/reasonml-editor/vscode-reasonml) instead.
+> Deprecated. Please use [this official extension](https://github.com/ocamllabs/vscode-ocaml-platform) instead.
 
 ## Features
 
